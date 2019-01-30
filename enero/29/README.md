@@ -22,57 +22,120 @@ Por lo menos la parte de los retardos se elige con el avg del ping.
 
 ### Metricas que uno ve ###
 
-1. **Articulo**: A Port Hopping Based DoS Mitigation Scheme in SDN Network
+**Algunos enlaces de consulta**:
+* Herramienta de ataque: [hping3](https://www.blackmoreops.com/2015/04/21/denial-of-service-attack-dos-using-hping3-with-spoofed-ip-in-kali-linux/) 
+* https://es.slideshare.net/Himani-Singh/type-of-ddos-attacks-with-hping3-example
+* https://pentest.blog/how-to-perform-ddos-test-as-a-pentester/
+* https://www.pedrocarrasco.org/manual-practico-de-hping/
 
-Herramienta de ataque: [hping3](https://www.blackmoreops.com/2015/04/21/denial-of-service-attack-dos-using-hping3-with-spoofed-ip-in-kali-linux/) 
-https://es.slideshare.net/Himani-Singh/type-of-ddos-attacks-with-hping3-example
-https://pentest.blog/how-to-perform-ddos-test-as-a-pentester/
-https://www.pedrocarrasco.org/manual-practico-de-hping/
+1. **Articulo 1**: A Port Hopping Based DoS Mitigation Scheme in SDN Network
 
-**Packet length (KB) .vs. CPU load (%)**:
 
-Experimento:
+**Experimento**
+
 * Mininet simulator
 * OVS switches
 * NOX SDN controller
 * the client, the server and the attackers (single node can run multiple attack codes)
 
+**Metricas**
 
-Ejemplo:
+**Metrica 1**: Packet length (KB) .vs. CPU load (%)
+
+1. Para obtener el CPU load:
+
+Obtener PID:
 
 ```bash
 ps -aux | grep ryu-manager
 ```
 
-PID = 6723
+Luego obtener el consumo de CPU:
 
 ```bash
-htop -p  6723
-top -n -p 6723
+htop -p  PID
+top -n -p PID
 ```
 
 Hasta el momento veo mejor htop. No logro interpretar top como quisiera.
 
-Sobre el ataque:
+2. Sobre el ataque: La idea es "construct a typical SYN (synchronize) flood DoS attack tool using hping3 and carry out DoS attack to
+available ports of the protected server one by one". El 
 
 ```bash
 hping3 -V -S -d SIZE --flood ip_victima
 ```
 
-Con --icmp-iphlen se fija la longitud...
+
+**Metrica 2**: DoS attack rate (MB/s) .vs. Response time (ms)
 
 
-**DoS attack rate (MB/s) .vs. Response time (ms)**
+La tasa de paquetes por segundo se fija con la opcion -i:
 
-
-La tasa del ataque se fija con la opcion -i:
-
-
-
+```bash
+#Fijando la tasa
 -i --interval
+```
+
+Donde **--interval** estara definido en X segundos o uX microsegundos. Por ejemplo:
+
+```bash
+#Tasa de envio de 10 paquetes por segundo
+hping3 ... -i u10000 ...
+
+#Tasa de envio de 1 paquete por segundo
+hping3 ... -i 1 ...
+```
 
 
 **Time (s) .vs. Transmission success rate (%)**
+
+Aun pendiente, no se como sacarlo
+
+
+**Articulo 2**: A Feasible Method to combat against DDoS Attack in SDN Network
+
+
+**Experimento**
+
+* Opnet
+* small topology which consists of 1 webserver and 03 PC clients (1 DDoS attacking user, 1 malicious user and 1 frequent user)
+* switch: capacity of 10.000 entries. Initially, it is empty. The normal entry has hard timeout and idle timeout equal to 600 seconds and 60 seconds. The entry for DDoS attacking user has hard timeout and idle timeout equal to (60, 10) seconds.
+* malicious user has IP address 10.0.0.1: It injects spoofed packets to the switch infinitely. For each packet, the destination IP address is generated randomly.
+* The DDoS attacking user sends spoofed packets to the switch infinitely. For each packet, the source and destination IP addresses are generated randomly.
+* The frequent user has IP address 10.0.0.2. It establishes 5 different connections to the server, and transmits 10 packets per connections.
+
+
+**Metricas**
+
+**Metrica 1**: time (sec) .vs. Number of entries in flow table (con y sin el metodo).
+
+**Metrica 2**: time (sec) .vs. Number of packets arrive at the controller (con y sin el metodo).
+
+**Metrica 3**: Time (sec) .vs. Bandwidth of the controller−switch channel (kbps)
+
+
+**Articulo 3**: FloodDefender: Protecting Data and Control Plane Resources under SDN-aimed DoS Attacks
+
+
+
+**Articulo 4**: The Effects of DoS Attacks on ODL and POX SDN Controllers
+
+**Articulo 5**: Experimental Evaluation of the Impact of DoS Attacks in SDN
+
+**Articulo 6**: Detection and Mitigation of Denial of Service (DoS) Attacks Using Performance Aware Software Defined Networking (SDN)
+
+**Articulo 7**: DDOS Detection and Denial using Third Party Application in SDN
+
+**Articulo 8**: SECOD: SDN sEcure COntrol and Data Plane Algorithm for Detecting and Defending against DoS Attacks
+
+FloodShield: Securing the SDN Infrastructure Against Denial-of-Service Attacks
+
+Towards A Secure SDN Architecture
+
+https://www.kali.org/news/official-kali-linux-docker-images/
+https://hub.docker.com/r/kalilinux/kali-linux-docker/
+
 
 ## Ensayos ##
 
