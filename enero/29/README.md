@@ -27,7 +27,12 @@ Por lo menos la parte de los retardos se elige con el avg del ping.
 * https://es.slideshare.net/Himani-Singh/type-of-ddos-attacks-with-hping3-example
 * https://pentest.blog/how-to-perform-ddos-test-as-a-pentester/
 * https://www.pedrocarrasco.org/manual-practico-de-hping/
-
+* [OpenFlow v1.3 Messages and Structures](http://www.cs.tau.ac.il/~schiffli/sdn/ryu_docs/ofproto_v1_3_ref.html)
+* [OpenFlow Switch Specification - Version 1.3.0](http://www.cs.yale.edu/homes/yu-minlan/teach/csci599-fall12/papers/openflow-spec-v1.3.0.pdf)
+* [OpenFlow v1.3 Messages and Structures](https://ryu.readthedocs.io/en/latest/ofproto_v1_3_ref.html)
+* [Overview of OpenFlow v1.3.0](http://docs.ruckuswireless.com/fastiron/08.0.61/fastiron-08061-sdnguide/GUID-031030CA-62EC-4009-A516-5510238EF8F4.html)
+* [Message Layer](http://flowgrammable.org/sdn/openflow/message-layer/#tab_ofp_1_3)
+* [How to Collect Switch Statistics (and Compute Bandwidth Utilization)](https://floodlight.atlassian.net/wiki/spaces/floodlightcontroller/pages/21856267/How+to+Collect+Switch+Statistics+and+Compute+Bandwidth+Utilization)
 1. **Articulo 1**: A Port Hopping Based DoS Mitigation Scheme in SDN Network
 
 
@@ -56,6 +61,8 @@ Luego obtener el consumo de CPU:
 htop -p  PID
 top -n -p PID
 ```
+
+Otra forma para obtener la CPU load e incluso otras medidas puede ser por medio del comando [docker stats](https://docs.docker.com/engine/reference/commandline/stats/) cuando lo que se tienen son contenedores. Para mayor facailidad existe una version en go conocida como [dockerstats](https://github.com/KyleBanks/dockerstats) que facilita la tarea de la recopilacion de las metricas.
 
 Hasta el momento veo mejor htop. No logro interpretar top como quisiera.
 
@@ -110,13 +117,49 @@ Aun pendiente, no se como sacarlo
 
 **Metrica 1**: time (sec) .vs. Number of entries in flow table (con y sin el metodo).
 
+El numero de entradas en la tabla de flujo se puede obtener al correr la aplicación (ofctl_rest.py)[https://github.com/osrg/ryu/blob/master/ryu/app/ofctl_rest.py] en ryu en algun controlador derivado como Faucet. Para saber los comandos de consulta ver el siguiente [enlace](https://ryu.readthedocs.io/en/latest/app/ofctl_rest.html), mas espeficicamente el comando para obtener las [Get aggregate flow stats](https://ryu.readthedocs.io/en/latest/app/ofctl_rest.html#get-aggregate-flow-stats). La interaccion se puede hacer mediante un cliente Rest (Postman por ejemplo) o alguna aplicacion en algun lenguaje de programación que use peticiones restful. Por ejemplo:
+
+```bash
+# Comando de consulta
+curl -X GET http://localhost:8080/stats/aggregateflow/1
+
+# Resultado
+{
+  "1": [
+    {
+      "packet_count": 18,
+      "byte_count": 756,
+      "flow_count": 3
+    }
+  ]
+}
+```
+
+Otra forma y tal vez **la mas apropiada** para obtener cada cierto tiempo seria ejecutar la aplicación [simple_monitor_13.py](https://github.com/osrg/ryu/blob/master/ryu/app/simple_monitor_13.py) haciendo unos cuantos ajustes para modificar la parte de las estadisticas en el tiempo. 
+
+En general para mas información sobre este tipo de estadistica consultar el link [MultipartRes Structure](http://flowgrammable.org/sdn/openflow/message-layer/statsresponse/#tab_ofp_1_3_0) o en su defecto para profundizar aun mas puede consultar la especificación [OpenFlow Switch Specification - Version 1.3.0](http://www.cs.yale.edu/homes/yu-minlan/teach/csci599-fall12/papers/openflow-spec-v1.3.0.pdf), mas exactamente la pagina 15 (Meter Table (Tabla de medidas)) y la pagina 60 (Multipart Messages).
+
 **Metrica 2**: time (sec) .vs. Number of packets arrive at the controller (con y sin el metodo).
+
+Para este caso, se emplearia un procedimiento muy similar al del caso anterior pero eligiendo la metrica **packet_count**
 
 **Metrica 3**: Time (sec) .vs. Bandwidth of the controller−switch channel (kbps)
 
+No se si la medida tiene sentido pero se ejecuto el siguiente comando en el mininet para medir el ancho de banda en el canal entre el switch y el controlador:
+
+```bash
+containernet> iperf s1 c0
+*** Iperf: testing TCP bandwidth between s1 and c0 
+*** Results: ['35.9 Gbits/sec', '36.0 Gbits/sec']
+```
+
+Como estoy como perdido con esto, dejo los siguientes enlaces:
+1. https://github.com/broadbent/openflow_bandwidth
+2. https://www.theseus.fi/bitstream/handle/10024/127303/HaapajarviMarika_YAMK.pdf?sequence=1
+
+La aplicación dada en el primer enlace parece como muy buena. Por lo menos en lo que respecta a esta parte es la misma que la de metrica 3 solo que lo que se toma son los **byte_count**
 
 **Articulo 3**: FloodDefender: Protecting Data and Control Plane Resources under SDN-aimed DoS Attacks
-
 
 
 **Articulo 4**: The Effects of DoS Attacks on ODL and POX SDN Controllers
@@ -256,7 +299,7 @@ https://stackoverflow.com/questions/43287437/compare-sdn-mininet-results-to-trad
 
 ## Enlaces ##
 
-### Sobre colas###
+### Sobre colas ###
 
 1. https://www.southampton.ac.uk/~drn1e09/ofertie/openflow_qos_mininet.pdf
 2. http://csie.nqu.edu.tw/smallko/sdn/mySDN_Lab5.pdf
