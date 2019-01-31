@@ -1,6 +1,11 @@
 # Ensayos #
 
 
+## Topologia ##
+
+A continuacion se muestra la topologia de test en su caso mas simple:
+
+![topologia-test](topologia-test.png)
 
 ## Algunos aspectos a tener en cuenta ##
 
