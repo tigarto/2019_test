@@ -97,3 +97,4 @@ Vemos que las estadisticas aparecen, sin embargo en el caso del almacenamiento d
 ## Pendientes ##
 
 1. Ver con 100 segundos lo que se tiene hasta el momento.
+2. Hacer la parte del iperf con el manejo del archivo cvs. Esto para podernos ahorrar posiblemente operacion de redirreccion en el codigo.
