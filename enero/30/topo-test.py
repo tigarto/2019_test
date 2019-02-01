@@ -87,7 +87,7 @@ def iperfTest( hSrc, hDst, seconds=3 ):
                   '&')
     '''
     hDst.cmdPrint('iperf', '-s', '&')
-    hSrc.cmdPrint('iperf', '-c', str(hDst.IP()), '-i' , str(seconds/4),'-t ' + str(seconds),
+    hSrc.cmdPrint('iperf', '-c', str(hDst.IP()), '-i' , str(seconds/4.0),'-t ' + str(seconds),
                   '>', outfile,
                   '2>', errfile,
                   '&')
