@@ -15,10 +15,14 @@ from select import poll, POLLIN
 from subprocess import Popen, PIPE
 from mininet.link import TCLink
 
+from time import time
+from time import sleep
+
 '''
 https://www.incapsula.com/cdn-guide/glossary/round-trip-time-rtt.html
 http://www.ateam-oracle.com/testing-latency-and-throughput/
 '''
+
 
 # sudo ryu-manager --verbose simple_switch_13.py ofctl_rest.py
 setLogLevel('info')
@@ -86,18 +90,26 @@ def iperfTest( hSrc, hDst, seconds=3 ):
                   '2>', errfile,
                   '&')
     '''
-    hDst.cmdPrint('iperf', '-s', '&')
+    hDst.cmdPrint('iperf', '-s', '&')  # El & es  necesario paara que no se bloque el programa
+    info("---> MARCA 1 <---\n")
+    '''
     hSrc.cmdPrint('iperf', '-c', str(hDst.IP()), '-i' , str(seconds/4.0),'-t ' + str(seconds),
                   '>', outfile,
                   '2>', errfile,
                   '&')
-    info( "Monitoring output for", seconds, "seconds\n" )
-    sleep(seconds + 2)
     '''
+    hSrc.cmdPrint('iperf', '-c', str(hDst.IP()), '-i' , str(seconds/4.0),'-t ' + str(seconds),
+                  '>', outfile,
+                  '2>', errfile, '&')
+    info("---> MARCA 2 <---\n")
+    info( "Monitoring output for", seconds, "seconds\n" )
+
+    # sleep(seconds + 2)
+
     for h, line in monitorFiles( hSrc, outfile, seconds, timeoutms=500 ):
         if h:
             info( '%s: %s\n' % ( h.name, line ) )
-    '''
+
     hSrc.cmd('kill %iperf')
     hSrc.cmd('kill %iperf')
 
@@ -149,10 +161,17 @@ info('*** Starting network\n')
 net.start()
 
 #pingTest(h1, h2, 5)
-pingTest(h1, h2, 5)
-iperfTest(h1,h2,10)
+pingTest(h1, h2, 100)
+iperfTest(h1,h2,100)
 #info('*** Running CLI\n')
 #CLI(net)
 
 info('*** Stopping network')
 net.stop()
+
+
+if __name__ == '__main__':
+    setLogLevel('info')
+    # monitorTest()
+
+
