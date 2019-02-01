@@ -15,6 +15,10 @@ from select import poll, POLLIN
 from subprocess import Popen, PIPE
 from mininet.link import TCLink
 
+'''
+https://www.incapsula.com/cdn-guide/glossary/round-trip-time-rtt.html
+http://www.ateam-oracle.com/testing-latency-and-throughput/
+'''
 
 # sudo ryu-manager --verbose simple_switch_13.py ofctl_rest.py
 setLogLevel('info')
@@ -68,6 +72,51 @@ def pingTest( hSrc, hDst, seconds=3 ):
     hSrc.cmd('kill %ping')
 
 
+def iperfTest( hSrc, hDst, seconds=3 ):
+    outfile = 'iperf.out'
+    errfile = 'iperf.err'
+    hSrc.cmd('echo >', outfile)
+    hSrc.cmd('echo >', errfile)
+    # Start pings
+    '''
+    hDst.cmdPrint('iperf', '-s', '-i', '0.5', '&')
+    
+    hSrc.cmdPrint('iperf', '-c', str(hDst.IP()), '-t ' + str(seconds),
+                  '>', outfile,
+                  '2>', errfile,
+                  '&')
+    '''
+    hDst.cmdPrint('iperf', '-s', '&')
+    hSrc.cmdPrint('iperf', '-c', str(hDst.IP()), '-i' , str(seconds/4),'-t ' + str(seconds),
+                  '>', outfile,
+                  '2>', errfile,
+                  '&')
+    info( "Monitoring output for", seconds, "seconds\n" )
+    sleep(seconds + 2)
+    '''
+    for h, line in monitorFiles( hSrc, outfile, seconds, timeoutms=500 ):
+        if h:
+            info( '%s: %s\n' % ( h.name, line ) )
+    '''
+    hSrc.cmd('kill %iperf')
+    hSrc.cmd('kill %iperf')
+
+'''
+def pingTest2(hSrc, hDst, seconds):
+    outfile = 'ping2.out'
+    errfile = 'ping2.err'
+    hSrc.cmd('echo >', outfile)
+    hSrc.cmd('echo >', errfile)
+    hSrc.cmd('echo >', outfile)
+    hSrc.cmd('echo >', errfile)
+    hSrc.cmdPrint('ping', hDst.IP(),
+                  '>', outfile,
+                  '2>', errfile,
+                  '&')
+    info("Monitoring output for", seconds, "seconds\n")
+    sleep(seconds)
+    hSrc.cmd('kill %ping')
+'''
 
 info('*** Create the controller \n')
 
@@ -99,15 +148,11 @@ net.build()
 info('*** Starting network\n')
 net.start()
 
+#pingTest(h1, h2, 5)
 pingTest(h1, h2, 5)
+iperfTest(h1,h2,10)
 #info('*** Running CLI\n')
 #CLI(net)
 
 info('*** Stopping network')
 net.stop()
-
-
-if __name__ == '__main__':
-    setLogLevel('info')
-
-
