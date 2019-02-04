@@ -143,10 +143,70 @@ containernet> iperf h2 h3
 
 De las mediciones asociadas con el iperf se pueden obtener el ancho de banda asociado con el link.
 
+Notese ademas que aun no se ha metido trafico de red.
 
+6. **```tcpdump```**: Tal y como se sugiere en [Cyberpaths - Network Traffic & Denial of Service Lab](http://mountrouidoux.people.cofc.edu/CyberPaths/networktrafficandddos.html) se puede emplear este comando para un analisis mas detallado, a continuación se describen los pasos:
+    1. Arrancar tcpdump en la victima (h3):
 
+    ```bash
+    # Terminal h3
 
+    tcpdump -i h3-eth0 -w capture1.pcap 
+    ```
 
+    2. Dar un ping desde el usuario (h2) a la victima (h3).
+
+    ```bash
+    # Terminal h2
+
+    ping 10.0.0.3 
+    ```
+   
+    3. Detener el ping y detener el tcpdump con CTRL + C (^C).
+
+    ```bash
+    # Terminal h2
+
+    ...
+    64 bytes from 10.0.0.3: icmp_seq=7 ttl=64 time=0.083 ms
+    ^C
+    --- 10.0.0.3 ping statistics ---
+    7 packets transmitted, 7 received, 0% packet loss, time 6131ms
+    rtt min/avg/max/mdev = 0.055/0.151/0.514/0.149 ms
+    ```
+
+    ```bash
+    # Terminal h3
+
+    ...
+    tcpdump: listening on h3-eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
+    ^C16 packets captured
+    16 packets received by filter
+    0 packets dropped by kernel
+    ```
+       
+    4. Leer la traza con tcpdump, tshark o wireshark.  
+
+    ```bash
+    # Terminal h3
+    tcpdump -r capture1.pcap
+    ...
+    16:04:16.503382 IP 10.0.0.2 > 10.0.0.3: ICMP echo request, id 24414, seq 6, length 64
+    16:04:16.503417 IP 10.0.0.3 > 10.0.0.2: ICMP echo reply, id 24414, seq 6, length 64
+    16:04:16.567273 ARP, Request who-has 10.0.0.2 tell 10.0.0.3, length 28
+    16:04:16.567751 ARP, Reply 10.0.0.2 is-at 00:00:00:00:00:02 (oui Ethernet), length 28
+    16:04:17.527376 IP 10.0.0.2 > 10.0.0.3: ICMP echo request, id 24414, seq 7, length 64
+    16:04:17.527399 IP 10.0.0.3 > 10.0.0.2: ICMP echo reply, id 24414, seq 7, length 64
+
+    ```
+
+    Con wireshark la cosa es mas o menos como sigue:
+
+    ![captura_ws](archivo_pcap.png)
+
+    En lo que respecta al grafico I/O, se tendrá:
+
+    ![captura_io](i_o_graph)
 
 
 ### Metricas llevadas a cabo ###
@@ -160,22 +220,30 @@ De las mediciones asociadas con el iperf se pueden obtener el ancho de banda aso
 1. [Cyberpaths - Network Traffic & Denial of Service Lab](http://mountrouidoux.people.cofc.edu/CyberPaths/networktrafficandddos.html)
 2. [OpenState-SDN/ryu](https://github.com/OpenState-SDN/ryu/wiki/DDoS)
 3. [DDoS Attack Detection in SDN-based VANET Architectures](https://projekter.aau.dk/projekter/files/239545035/Master_Thesis___DDoS_Attack_Detection_in_SDN_based_VANET_Architectures__group_1097.pdf)
-4. [CS244 ’13: LOW RATE TCP-TARGETED DOS ATTACK](https://reproducingnetworkresearch.wordpress.com/2013/03/13/cs-244-13-low-rate-tcp-targeted-dos-attack/)
-5. [CS244 ’17: LOW-RATE TCP DOS ATTACKS](https://reproducingnetworkresearch.wordpress.com/2017/06/05/cs244-17-low-rate-tcp-dos-attacks/)
-6. [Hping3](https://github.com/jkotrady/hping/wiki/Hping3)
-7. [Hping3 Packet Grenade](https://gist.github.com/Erreinion/c810b9561ffa423cca01)
-8. [detecting Dos attacks on mininet](https://seclists.org/snort/2016/q3/83)
-9. [OpenState-SDN/ryu](https://github.com/OpenState-SDN/ryu/wiki/DDoS)
-10. A Software Approach for Mitigation of DoS Attacks on SDN’s (Software-Defined Networks)
+4. [How to get the total number of openflow-related packets that are transmitted between controller and switches?](http://csie.nqu.edu.tw/smallko/sdn/openflow_pkts.htm)
+5. [Mininet XTerm, TCP dump and iperf](http://windysdn.blogspot.com/2013/09/mininet-xterm-tcp-dump-and-iperf.html)
+6. [Create a Learning Switch]((https://github.com/mininet/openflow-tutorial/wiki/Create-a-Learning-Switch#Verify_Hub_Behavior_with_tcpdump)
+7. [CS244 ’13: LOW RATE TCP-TARGETED DOS ATTACK](https://reproducingnetworkresearch.wordpress.com/2013/03/13/cs-244-13-low-rate-tcp-targeted-dos-attack/)
+8. [CS244 ’17: LOW-RATE TCP DOS ATTACKS](https://reproducingnetworkresearch.wordpress.com/2017/06/05/cs244-17-low-rate-tcp-dos-attacks/)
+9. [Hping3](https://github.com/jkotrady/hping/wiki/Hping3)
+10. [Hping3 Packet Grenade](https://gist.github.com/Erreinion/c810b9561ffa423cca01)
+11. [detecting Dos attacks on mininet](https://seclists.org/snort/2016/q3/83)
+12. [OpenState-SDN/ryu](https://github.com/OpenState-SDN/ryu/wiki/DDoS)
+13. A Software Approach for Mitigation of DoS Attacks on SDN’s (Software-Defined Networks)
     1.  [Enlace 1](https://books.google.com.co/books?id=nHhqDwAAQBAJ&pg=PA338&lpg=PA338&dq=hping+dos+mininet&source=bl&ots=Et2tD5_m38&sig=ACfU3U2FcCLvdcgzplni51qgiqOeOMJd7g&hl=es&sa=X&ved=2ahUKEwiOyoLN26LgAhVyrlkKHT6-D1k4ChDoATACegQIBxAB#v=onepage&q=hping%20dos%20mininet&f=false)
     2.  [Enlace 2](https://github.com/mishra14/DDoSAttackMitigationSystem)
-11. [kawaljeet024/DDOS-Attack-using-Entropy-method-in-SDN-environmnet](https://github.com/kawaljeet024/DDOS-Attack-using-Entropy-method-in-SDN-environmnet)
-12. [wenjoseph/TCPDoS](https://github.com/wenjoseph/TCPDoS)
-13. [krishnatejay/research  ](https://github.com/krishnatejay/research)
-14. [rprabhuh/SDNDDoS](https://github.com/rprabhuh/SDNDDoS)
-15. [Automatic Detection of Elephant flows through Openflow-based OpenvSwitch](http://trap.ncirl.ie/2873/1/spurthimallesh.pdf)
-16. [pblanc5/Mininet-Simulated-DDOS](https://github.com/pblanc5/Mininet-Simulated-DDOS)
-17. [omkarsuram/SDN-DDoS](https://github.com/omkarsuram/SDN-DDoS)
+14. [kawaljeet024/DDOS-Attack-using-Entropy-method-in-SDN-environmnet](https://github.com/kawaljeet024/DDOS-Attack-using-Entropy-method-in-SDN-environmnet)
+15. [wenjoseph/TCPDoS](https://github.com/wenjoseph/TCPDoS)
+16. [krishnatejay/research  ](https://github.com/krishnatejay/research)
+17. [rprabhuh/SDNDDoS](https://github.com/rprabhuh/SDNDDoS)
+18. [Automatic Detection of Elephant flows through Openflow-based OpenvSwitch](http://trap.ncirl.ie/2873/1/spurthimallesh.pdf)
+19. [pblanc5/Mininet-Simulated-DDOS](https://github.com/pblanc5/Mininet-Simulated-DDOS)
+20. [omkarsuram/SDN-DDoS](https://github.com/omkarsuram/SDN-DDoS)
+21. [Ryuretic](https://github.com/Ryuretic/RyureticLabs/wiki)
+22. https://hackertarget.com/tcpdump-examples/
+23. https://danielmiessler.com/study/tcpdump/
+24. https://www.tecmint.com/12-tcpdump-commands-a-network-sniffer-tool/
+    
 
 
 
