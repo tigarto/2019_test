@@ -42,10 +42,108 @@ sudo ryu-manager --verbose simple_switch_13.py ofctl_rest.py
 2. Iniciar la topologia:
 
 ```bash
-sudo mn --topo single,3 --mac --controller remote, ip = 127.0.0.1:6653  --link tc,bw=100 --switch ovsk,protocols=OpenFlow13
+sudo mn --topo=single,3 --mac --switch=ovsk,protocols=OpenFlow13 --controller=remote,ip=127.0.0.1:6653  --link=tc,bw=100 
 ```
 
 3. Realizar las pruebas en mininet una vez este se cargue:
+
+```bash
+containernet>
+```
+
+Algunos comandos utilizados simples:
+1. **```pingall```**:
+
+```bash
+containernet> pingall
+*** Ping: testing ping reachability
+h1 -> h2 h3 
+h2 -> h1 h3 
+h3 -> h1 h2 
+*** Results: 0% dropped (6/6 received)
+```
+
+2. **```h1 ping -c 10 -i 0.5 h2```** para hacer pruebas simples:
+
+```bash
+containernet>  h1 ping -c 10 -i 0.5 h2
+PING 10.0.0.2 (10.0.0.2) 56(84) bytes of data.
+64 bytes from 10.0.0.2: icmp_seq=1 ttl=64 time=0.317 ms
+64 bytes from 10.0.0.2: icmp_seq=2 ttl=64 time=0.093 ms
+64 bytes from 10.0.0.2: icmp_seq=3 ttl=64 time=0.109 ms
+64 bytes from 10.0.0.2: icmp_seq=4 ttl=64 time=0.092 ms
+64 bytes from 10.0.0.2: icmp_seq=5 ttl=64 time=0.096 ms
+64 bytes from 10.0.0.2: icmp_seq=6 ttl=64 time=0.102 ms
+64 bytes from 10.0.0.2: icmp_seq=7 ttl=64 time=0.093 ms
+64 bytes from 10.0.0.2: icmp_seq=8 ttl=64 time=0.099 ms
+64 bytes from 10.0.0.2: icmp_seq=9 ttl=64 time=0.092 ms
+64 bytes from 10.0.0.2: icmp_seq=10 ttl=64 time=0.041 ms
+
+--- 10.0.0.2 ping statistics ---
+10 packets transmitted, 10 received, 0% packet loss, time 4627ms
+rtt min/avg/max/mdev = 0.041/0.113/0.317/0.070 ms
+```
+
+De las mediciones 1 y 2 se pueden obtener metricas como el Packet delivery ratio y el RTT asociado al delay.
+
+3. **```iperf```**:
+
+```bash
+containernet> iperf
+*** Iperf: testing TCP bandwidth between h1 and h3 
+*** Results: ['95.7 Mbits/sec', '96.8 Mbits/sec']
+```
+
+4. **```iperf h2 h3```**:
+   
+```bash
+containernet> iperf h2 h3
+*** Iperf: testing TCP bandwidth between h2 and h3 
+*** Results: ['95.7 Mbits/sec', '96.8 Mbits/sec']
+```
+
+5. Uso de iperf empleando h2 como cliente iperf y h3 como servidor iperf (se acceden a cada una de las consolas con iperf **```xterm h2 h3```**):
+
+    1. Arrancar el servidor iperf: 
+   
+        ```bash
+        # Consola h3
+        root@fuck-pc:~/Documents/tesis_2019-1/tests/febrero/04# iperf -s
+        ------------------------------------------------------------
+        Server listening on TCP port 5001
+        TCP window size: 85.3 KByte (default)
+        ------------------------------------------------------------
+
+        ```
+
+    2. Arrancar el cliente iperf:
+
+        ```bash
+        # Consola h2
+        root@fuck-pc:~/Documents/tesis_2019-1/tests/febero/04# iperf -t 10 -i 1 -c 10.0.0.3
+        ------------------------------------------------------------
+        Client connecting to 10.0.0.3, TCP port 5001
+        TCP window size: 85.3 KByte (default)
+        ------------------------------------------------------------
+        [ 16] local 10.0.0.2 port 36062 connected with 10.0.0.3 port 5001
+        [ ID] Interval       Transfer     Bandwidth
+        [ 16]  0.0- 1.0 sec  12.2 MBytes   103 Mbits/sec
+        [ 16]  1.0- 2.0 sec  11.1 MBytes  93.3 Mbits/sec
+        [ 16]  2.0- 3.0 sec  11.5 MBytes  96.5 Mbits/sec
+        [ 16]  3.0- 4.0 sec  11.5 MBytes  96.5 Mbits/sec
+        [ 16]  4.0- 5.0 sec  11.2 MBytes  94.4 Mbits/sec
+        [ 16]  5.0- 6.0 sec  11.5 MBytes  96.5 Mbits/sec
+        [ 16]  6.0- 7.0 sec  11.5 MBytes  96.5 Mbits/sec
+        [ 16]  7.0- 8.0 sec  11.5 MBytes  96.5 Mbits/sec
+        [ 16]  8.0- 9.0 sec  11.2 MBytes  94.4 Mbits/sec
+        [ 16]  9.0-10.0 sec  11.5 MBytes  96.5 Mbits/sec
+        [ 16]  0.0-10.0 sec   115 MBytes  96.3 Mbits/sec
+        root@fuck-pc:~/Documents/tesis_2019-1/tests/febrero/04# 
+        ```
+
+De las mediciones asociadas con el iperf se pueden obtener el ancho de banda asociado con el link.
+
+
 
 
 
