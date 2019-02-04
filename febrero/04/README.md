@@ -208,6 +208,232 @@ Notese ademas que aun no se ha metido trafico de red.
 
     ![captura_io](i_o_graph)
 
+### Analisis con ataques ###
+
+Esta sección corresponde a la parte 4 **Part 4: Running an attack, observing user traffic, collecting and analyzing data** de [Cyberpaths - Network Traffic & Denial of Service Lab](http://mountrouidoux.people.cofc.edu/CyberPaths/networktrafficandddos.html). En el caso nuestro consistio en lo siguiente:
+
+1. Arrancar el controlador.
+
+```bash
+sudo ryu-manager --verbose simple_switch_13.py ofctl_rest.py
+```
+
+2. Arrancar la topologia.
+
+```bash
+sudo mn --topo=single,3 --mac --switch=ovsk,protocols=OpenFlow13 --controller=remote,ip=127.0.0.1:6653  --link=tc,bw=100 
+```
+
+3. Ejecutar el servidor iperf en la victima (h3) a la cual se accede con **```xterm h3```**:
+
+```bash
+# Terminal h3
+iperf -s
+```
+
+4. Ejecutar el cliente en la cliente (h2) a la cual se accede con **```xterm h2```**:
+
+```bash
+# Terminal h2
+iperf -c 10.0.0.3
+```
+
+Hasta el momento las salidas de los comandos 3 y 4 son:
+
+**Salida comando 3**:
+
+```bash
+# Terminal h3
+root@fuck-pc:~/Documents/tesis_2019-1/tests/febrero/04# iperf -s
+------------------------------------------------------------
+Server listening on TCP port 5001
+TCP window size: 85.3 KByte (default)
+------------------------------------------------------------
+```
+
+**Salida comando 4**:
+
+```bash
+# Terminal h2
+root@fuck-pc:~/Documents/tesis_2019-1/tests/febrero/04# iperf -c 10.0.0.3
+------------------------------------------------------------
+Client connecting to 10.0.0.3, TCP port 5001
+TCP window size: 85.3 KByte (default)
+------------------------------------------------------------
+[ 16] local 10.0.0.2 port 42972 connected with 10.0.0.3 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[ 16]  0.0-10.0 sec   115 MBytes  96.2 Mbits/sec
+```
+
+5. Cuando se obtenga el resultado en el cliente se puede suspender la ejecución h3 del servidor iperf con CTRL + C
+
+```bash
+# Terminal h3
+root@fuck-pc:~/Documents/tesis_2019-1/tests/febrero/04# iperf -s
+------------------------------------------------------------
+Server listening on TCP port 5001
+TCP window size: 85.3 KByte (default)
+------------------------------------------------------------
+[ 17] local 10.0.0.3 port 5001 connected with 10.0.0.2 port 42972
+[ ID] Interval       Transfer     Bandwidth
+[ 17]  0.0-10.1 sec   115 MBytes  95.6 Mbits/sec
+```
+
+**Analizando trafico de red**
+
+6. Ejecutar el comando tcpdump en la interfaz de red que conecta el switch con la victima para analizar el trafico que pasa por alli. Se accede previamente a la consola del switch s1 con el comando **```xterm s1```**
+
+```bash
+# Terminal s1
+
+sudo tcpdump -i s1-eth3 -vv -w capture2.pcap
+```
+
+7. Repetir los pasos 3 y 4:
+
+```bash
+# Terminal h3
+iperf -s
+```
+
+```bash
+# Terminal h2
+iperf -c 10.0.0.3
+```
+
+Para el caso dado, las salidas fueron las siguientes:
+
+```bash
+# Terminal s1
+sudo tcpdump -i s1-eth3 -vv -w capture2.pcap
+tcpdump: listening on s1-eth3, link-type EN10MB (Ethernet), capture size 262144 bytes
+^C10550 packets captured
+10550 packets received by filter
+0 packets dropped by kernel
+root@fuck-pc:~/Documents/tesis_2019-1/tests/febrero/04# 
+```
+
+```bash
+# Terminal h3
+iperf -s
+------------------------------------------------------------
+Server listening on TCP port 5001
+TCP window size: 85.3 KByte (default)
+------------------------------------------------------------
+[ 17] local 10.0.0.3 port 5001 connected with 10.0.0.2 port 43446
+[ ID] Interval       Transfer     Bandwidth
+[ 17]  0.0-10.1 sec   115 MBytes  95.6 Mbits/sec
+```
+
+
+```bash
+# Terminal h1
+iperf -c 10.0.0.3
+------------------------------------------------------------
+Client connecting to 10.0.0.3, TCP port 5001
+TCP window size: 85.3 KByte (default)
+------------------------------------------------------------
+[ 16] local 10.0.0.2 port 43446 connected with 10.0.0.3 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[ 16]  0.0-10.0 sec   115 MBytes  96.3 Mbits/sec
+```
+
+8. Analizar resultados: Para este caso, se abrio el archivo pcap en wireshark tal y como se muestra a continuación:
+
+![archivo_pcap2](archivo_pcap2.png)
+
+Analizando la grafica I/O se llega al siguiente resultado:
+
+![i_o_graph2_1](i_o_graph2_1)
+
+Como se puede ver de la grafica anterior se tiene un ancho de banda de 100 Mbps.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1. Ejecutar ping desde host h1. Se accede previamente a la consola del host h1 con el comando **```xterm h1```***
+
+```bash
+# Terminal h1
+ping 10.0.0.3
+```
+
+5. Analizar los resultados despues de detener la aplicación de los comandos.
+
+**Terminal h1**:
+
+```bash
+# Terminal h1
+
+root@fuck-pc:~/Documents/tesis_2019-1/tests/febrero/04# ping 10.0.0.3
+PING 10.0.0.3 (10.0.0.3) 56(84) bytes of data.
+64 bytes from 10.0.0.3: icmp_seq=1 ttl=64 time=0.450 ms
+64 bytes from 10.0.0.3: icmp_seq=2 ttl=64 time=0.117 ms
+64 bytes from 10.0.0.3: icmp_seq=3 ttl=64 time=0.138 ms
+64 bytes from 10.0.0.3: icmp_seq=4 ttl=64 time=0.154 ms
+64 bytes from 10.0.0.3: icmp_seq=5 ttl=64 time=0.052 ms
+64 bytes from 10.0.0.3: icmp_seq=6 ttl=64 time=0.131 ms
+^C
+--- 10.0.0.3 ping statistics ---
+6 packets transmitted, 6 received, 0% packet loss, time 5116ms
+rtt min/avg/max/mdev = 0.052/0.173/0.450/0.128 ms
+root@fuck-pc:~/Documents/tesis_2019-1/tests/febrero/04# 
+ping 10.0.0.3
+```
+
+
+**Terminal s1**:
+
+```bash
+# Terminal s1
+sudo tcpdump -i s1-eth3 -vv
+tcpdump: listening on s1-eth3, link-type EN10MB (Ethernet), capture size 262144 bytes
+17:19:03.211645 IP (tos 0x0, ttl 64, id 15416, offset 0, flags [DF], proto ICMP (1), length 84)
+    10.0.0.1 > 10.0.0.3: ICMP echo request, id 6312, seq 1, length 64
+17:19:03.211686 IP (tos 0x0, ttl 64, id 58867, offset 0, flags [none], proto ICMP (1), length 84)
+    10.0.0.3 > 10.0.0.1: ICMP echo reply, id 6312, seq 1, length 64
+17:19:04.231470 IP (tos 0x0, ttl 64, id 15532, offset 0, flags [DF], proto ICMP (1), length 84)
+    10.0.0.1 > 10.0.0.3: ICMP echo request, id 6312, seq 2, length 64
+17:19:04.231514 IP (tos 0x0, ttl 64, id 58874, offset 0, flags [none], proto ICMP (1), length 84)
+    10.0.0.3 > 10.0.0.1: ICMP echo reply, id 6312, seq 2, length 64
+17:19:05.255504 IP (tos 0x0, ttl 64, id 15576, offset 0, flags [DF], proto ICMP (1), length 84)
+    10.0.0.1 > 10.0.0.3: ICMP echo request, id 6312, seq 3, length 64
+17:19:05.255559 IP (tos 0x0, ttl 64, id 58911, offset 0, flags [none], proto ICMP (1), length 84)
+    10.0.0.3 > 10.0.0.1: ICMP echo reply, id 6312, seq 3, length 64
+17:19:06.279505 IP (tos 0x0, ttl 64, id 15780, offset 0, flags [DF], proto ICMP (1), length 84)
+    10.0.0.1 > 10.0.0.3: ICMP echo request, id 6312, seq 4, length 64
+17:19:06.279566 IP (tos 0x0, ttl 64, id 59078, offset 0, flags [none], proto ICMP (1), length 84)
+    10.0.0.3 > 10.0.0.1: ICMP echo reply, id 6312, seq 4, length 64
+17:19:07.303374 IP (tos 0x0, ttl 64, id 15957, offset 0, flags [DF], proto ICMP (1), length 84)
+    10.0.0.1 > 10.0.0.3: ICMP echo request, id 6312, seq 5, length 64
+17:19:07.303393 IP (tos 0x0, ttl 64, id 59267, offset 0, flags [none], proto ICMP (1), length 84)
+    10.0.0.3 > 10.0.0.1: ICMP echo reply, id 6312, seq 5, length 64
+17:19:08.327515 IP (tos 0x0, ttl 64, id 16213, offset 0, flags [DF], proto ICMP (1), length 84)
+    10.0.0.1 > 10.0.0.3: ICMP echo request, id 6312, seq 6, length 64
+17:19:08.327560 IP (tos 0x0, ttl 64, id 59453, offset 0, flags [none], proto ICMP (1), length 84)
+    10.0.0.3 > 10.0.0.1: ICMP echo reply, id 6312, seq 6, length 64
+17:19:08.423329 ARP, Ethernet (len 6), IPv4 (len 4), Request who-has 10.0.0.1 tell 10.0.0.3, length 28
+17:19:08.423732 ARP, Ethernet (len 6), IPv4 (len 4), Reply 10.0.0.1 is-at 00:00:00:00:00:01 (oui Ethernet), length 28
+^C
+14 packets captured
+14 packets received by filter
+0 packets dropped by kernel
+```
 
 ### Metricas llevadas a cabo ###
 
