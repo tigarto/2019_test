@@ -346,94 +346,169 @@ Analizando la grafica I/O se llega al siguiente resultado:
 
 ![i_o_graph2_1](i_o_graph2_1)
 
-Como se puede ver de la grafica anterior se tiene un ancho de banda de 100 Mbps.
+Como se puede ver de la grafica anterior se tiene un ancho de banda de 10 Mb/0.1s = 100 Mbps.
 
+**Viendo el efecto del ataque**
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1. Ejecutar ping desde host h1. Se accede previamente a la consola del host h1 con el comando **```xterm h1```***
-
-```bash
-# Terminal h1
-ping 10.0.0.3
-```
-
-5. Analizar los resultados despues de detener la aplicación de los comandos.
-
-**Terminal h1**:
-
-```bash
-# Terminal h1
-
-root@fuck-pc:~/Documents/tesis_2019-1/tests/febrero/04# ping 10.0.0.3
-PING 10.0.0.3 (10.0.0.3) 56(84) bytes of data.
-64 bytes from 10.0.0.3: icmp_seq=1 ttl=64 time=0.450 ms
-64 bytes from 10.0.0.3: icmp_seq=2 ttl=64 time=0.117 ms
-64 bytes from 10.0.0.3: icmp_seq=3 ttl=64 time=0.138 ms
-64 bytes from 10.0.0.3: icmp_seq=4 ttl=64 time=0.154 ms
-64 bytes from 10.0.0.3: icmp_seq=5 ttl=64 time=0.052 ms
-64 bytes from 10.0.0.3: icmp_seq=6 ttl=64 time=0.131 ms
-^C
---- 10.0.0.3 ping statistics ---
-6 packets transmitted, 6 received, 0% packet loss, time 5116ms
-rtt min/avg/max/mdev = 0.052/0.173/0.450/0.128 ms
-root@fuck-pc:~/Documents/tesis_2019-1/tests/febrero/04# 
-ping 10.0.0.3
-```
-
-
-**Terminal s1**:
+1. Ejecutar el comando tcpdump en la interfaz de red que conecta el switch con la victima para analizar el trafico que pasa por alli. Se accede previamente a la consola del switch s1 con el comando **```xterm s1```**
 
 ```bash
 # Terminal s1
-sudo tcpdump -i s1-eth3 -vv
-tcpdump: listening on s1-eth3, link-type EN10MB (Ethernet), capture size 262144 bytes
-17:19:03.211645 IP (tos 0x0, ttl 64, id 15416, offset 0, flags [DF], proto ICMP (1), length 84)
-    10.0.0.1 > 10.0.0.3: ICMP echo request, id 6312, seq 1, length 64
-17:19:03.211686 IP (tos 0x0, ttl 64, id 58867, offset 0, flags [none], proto ICMP (1), length 84)
-    10.0.0.3 > 10.0.0.1: ICMP echo reply, id 6312, seq 1, length 64
-17:19:04.231470 IP (tos 0x0, ttl 64, id 15532, offset 0, flags [DF], proto ICMP (1), length 84)
-    10.0.0.1 > 10.0.0.3: ICMP echo request, id 6312, seq 2, length 64
-17:19:04.231514 IP (tos 0x0, ttl 64, id 58874, offset 0, flags [none], proto ICMP (1), length 84)
-    10.0.0.3 > 10.0.0.1: ICMP echo reply, id 6312, seq 2, length 64
-17:19:05.255504 IP (tos 0x0, ttl 64, id 15576, offset 0, flags [DF], proto ICMP (1), length 84)
-    10.0.0.1 > 10.0.0.3: ICMP echo request, id 6312, seq 3, length 64
-17:19:05.255559 IP (tos 0x0, ttl 64, id 58911, offset 0, flags [none], proto ICMP (1), length 84)
-    10.0.0.3 > 10.0.0.1: ICMP echo reply, id 6312, seq 3, length 64
-17:19:06.279505 IP (tos 0x0, ttl 64, id 15780, offset 0, flags [DF], proto ICMP (1), length 84)
-    10.0.0.1 > 10.0.0.3: ICMP echo request, id 6312, seq 4, length 64
-17:19:06.279566 IP (tos 0x0, ttl 64, id 59078, offset 0, flags [none], proto ICMP (1), length 84)
-    10.0.0.3 > 10.0.0.1: ICMP echo reply, id 6312, seq 4, length 64
-17:19:07.303374 IP (tos 0x0, ttl 64, id 15957, offset 0, flags [DF], proto ICMP (1), length 84)
-    10.0.0.1 > 10.0.0.3: ICMP echo request, id 6312, seq 5, length 64
-17:19:07.303393 IP (tos 0x0, ttl 64, id 59267, offset 0, flags [none], proto ICMP (1), length 84)
-    10.0.0.3 > 10.0.0.1: ICMP echo reply, id 6312, seq 5, length 64
-17:19:08.327515 IP (tos 0x0, ttl 64, id 16213, offset 0, flags [DF], proto ICMP (1), length 84)
-    10.0.0.1 > 10.0.0.3: ICMP echo request, id 6312, seq 6, length 64
-17:19:08.327560 IP (tos 0x0, ttl 64, id 59453, offset 0, flags [none], proto ICMP (1), length 84)
-    10.0.0.3 > 10.0.0.1: ICMP echo reply, id 6312, seq 6, length 64
-17:19:08.423329 ARP, Ethernet (len 6), IPv4 (len 4), Request who-has 10.0.0.1 tell 10.0.0.3, length 28
-17:19:08.423732 ARP, Ethernet (len 6), IPv4 (len 4), Reply 10.0.0.1 is-at 00:00:00:00:00:01 (oui Ethernet), length 28
+
+sudo tcpdump -i s1-eth3 -vv -w capture3.pcap
+```
+
+
+2. Ejecutar en el atacante el comando:
+
+```bash
+# Terminal h1
+
+sudo hping3 -S --flood 10.0.0.3
+```
+
+3. Detener el ataque (Ctrl + C):
+
+```bash
+# Terminal h1
+sudo hping3 -S --flood  10.0.0.3
+HPING 10.0.0.3 (h1-eth0 10.0.0.3): S set, 40 headers + 0 data bytes
+hping in flood mode, no replies will be shown
 ^C
-14 packets captured
-14 packets received by filter
+--- 10.0.0.3 hping statistic ---
+1326172 packets transmitted, 0 packets received, 100% packet loss
+round-trip min/avg/max = 0.0/0.0/0.0 ms
+```
+
+4. Detener la captura:
+
+```bash
+# Terminal s1
+sudo tcpdump -i s1-eth3
+ -vv -w capture3.pcap
+tcpdump: listening on s1-eth3, link-type EN10MB (Ethernet), capture size 262144 bytes
+^C2652350 packets captured
+2652350 packets received by filter
 0 packets dropped by kernel
 ```
+
+4. Analizar la traza:
+
+Procediendo de manera similar a otros casos se tiene:
+
+**Traza en wireshark**
+
+![archivo_pcap3](archivo_pcap3.png)
+
+**Grafica I/O de la traza**
+
+![i_o_graph3](i_o_graph3)
+
+Como se puede ver de la grafica, basicamente se satura la red con el trafico del ataque. 
+
+### Resumen del procedimiento ###
+
+A continuación se presenta un resumen de lo visto hasta el momento. Para mayor información consultar las secciones 5, 6 y 7 de [Cyberpaths - Network Traffic & Denial of Service Lab](http://mountrouidoux.people.cofc.edu/CyberPaths/networktrafficandddos.html). Los pasos serian:
+
+1. Arranque el controlador:
+   
+```bash
+sudo ryu-manager --verbose simple_switch_13.py ofctl_rest.py
+```
+
+2. Arranque la topologia:
+
+```nash
+sudo mn --topo=single,3 --mac --switch=ovsk,protocols=OpenFlow13 --controller=remote,ip=127.0.0.1:6653  --link=tc,bw=100 
+```
+
+3. Arranque el tcpdump (en el switch aunque creo que no es necesario en el caso de mininet):
+
+```bash
+sudo tcpdump -i s1-eth3 -vv -w capture_N.pcap
+```
+
+4. Arranque el servidor iperf en la victima (h3):
+
+```bash
+iperf -s
+```
+
+5. Arranque el cliente iperf (en el cliente h2):
+
+```bash
+iperf -c 10.0.0.3
+```
+
+6. Detenga el servidor iperf una vez el cliente haya enviado todos lo datos.
+
+7. lance el ataque (desde h1) esperando por un tiempo determinado. En el ejemplo que se estudio fue por 30 segundos:
+   
+```bash
+sudo hping3 -S --flood 10.0.0.3
+```
+
+8. Detenga el ataque.
+
+9. Detenga la captura con tcpdump.
+
+10. Analice los resultados y saque conclusiones.
+
+### Efecto del ataque sobre el ancho de banda ###
+
+
+
+
+## Desordenado ##
+
+Comando en el cual hay aproximadamente 10 segundos de envio de paquetes a una tasa de 1 paquete cada medio segundo para un total de 20 paquetes en 10 segundos.
+
+```bash
+hping3 -c 20 -i u500000 10.0.0.3 
+HPING 10.0.0.3 (h1-eth0 10.0.0.3): NO FLAGS are set, 40 headers + 0 data bytes
+len=40 ip=10.0.0.3 ttl=64 DF id=48744 sport=0 flags=RA seq=0 win=0 rtt=7.7 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=48804 sport=0 flags=RA seq=1 win=0 rtt=3.5 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=48890 sport=0 flags=RA seq=2 win=0 rtt=7.1 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=48988 sport=0 flags=RA seq=3 win=0 rtt=7.0 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=49069 sport=0 flags=RA seq=4 win=0 rtt=6.8 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=49180 sport=0 flags=RA seq=5 win=0 rtt=2.5 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=49265 sport=0 flags=RA seq=6 win=0 rtt=6.3 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=49328 sport=0 flags=RA seq=7 win=0 rtt=6.2 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=49419 sport=0 flags=RA seq=8 win=0 rtt=6.0 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=49543 sport=0 flags=RA seq=9 win=0 rtt=1.8 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=49646 sport=0 flags=RA seq=10 win=0 rtt=1.7 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=49648 sport=0 flags=RA seq=11 win=0 rtt=1.4 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=49758 sport=0 flags=RA seq=12 win=0 rtt=5.2 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=49764 sport=0 flags=RA seq=13 win=0 rtt=5.0 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=49790 sport=0 flags=RA seq=14 win=0 rtt=0.8 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=49802 sport=0 flags=RA seq=15 win=0 rtt=4.7 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=49818 sport=0 flags=RA seq=16 win=0 rtt=4.5 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=49941 sport=0 flags=RA seq=17 win=0 rtt=4.3 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=50013 sport=0 flags=RA seq=18 win=0 rtt=4.1 ms
+len=40 ip=10.0.0.3 ttl=64 DF id=50056 sport=0 flags=RA seq=19 win=0 rtt=8.0 ms
+
+--- 10.0.0.3 hping statistic ---
+20 packets transmitted, 20 packets received, 0% packet loss
+round-trip min/avg/max = 0.8/4.7/8.0 ms
+```
+
+hping3 -c 2000000 -i u50 10.0.0.3 --rand-source
+iperf -t 20 -i 0.5 -c 10.0.0.3
+
+Pero mejor tal vez poner fin a hping3 con **CTRL + C**
+
+iperf -t 20 -i 0.5 -c 10.0.0.3
+
+hping3 --flood -i u50 10.0.0.3 --rand-source
+
+Parece que si se usa el i el lfood sobra.
+
+En la documentacion sale: https://www.systutorials.com/docs/linux/man/8-hping3/
+
+--flood
+Sent packets as fast as possible, without taking care to show incoming replies. This is ways faster than to specify the -i u0 option.
+
+
 
 ### Metricas llevadas a cabo ###
 
