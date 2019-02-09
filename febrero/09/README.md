@@ -47,6 +47,7 @@ El resultado en ambos casos será un archivo de salida y su correspondiente vers
 ## Done ##
 1. Automatización del ataque y medidas (Muy basico).
 2. Pruebas manuales (ver [enlace](https://github.com/tigarto/2019_test/blob/master/febrero/04/README.md))
+3. Generando replicas para el ataque
 ----
 ## Notas ##
 Lo que se lleva no esta libre de bugs.
