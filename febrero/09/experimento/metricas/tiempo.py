@@ -69,7 +69,7 @@ class PingMeasure(object):
 
 class PingMeasureAttack(PingMeasure):
     def __init__(self, C=None, A=None, V=None, ipps = None, outfile='ping_measure.out', t_total=10, intervalo=1):
-        PingMeasure.__init__(self,A, V, outfile, t_total, intervalo)
+        PingMeasure.__init__(self, hSrc = A, hDst = V, outfile = outfile,t_total = t_total, intervalo = intervalo)
         self.__hM = C
         self.__ipps = ipps
 
@@ -82,19 +82,38 @@ class PingMeasureAttack(PingMeasure):
     def getHosts(self):
         return [self.__hSrc,self.__hDst,self.__hM]
 
+    def printConfiguration(self):
+        [A, V, C] = self.getHosts()
+        info("-----------------------------\n\n")
+        info("Configuracion del ataque\n")
+        info("-----------------------------\n")
+        info("Atacante: %s\n"%A)
+        info("Victima: %s\n" %V)
+        info("Cliente: %s\n\n" %C)
+        info("Tiempo entre paquetes %s\n"%self.__ipps)
+        [t, i] = self.getPingParameters()
+        info("-----------------------------\n")
+        info("Configuracion del analisis\n")
+        info("-----------------------------\n")
+        info("tiempo total: %s\n"%t)
+        info("Intervalo: %s\n" %i)
+        info("Archivo: %s\n\n" % self.getFileName())
+
     def medirAtaque(self):
         logfile = open(self.getFileName(), 'w')
         [A,V,C] = self.getHosts()
-        info("Launch attack: %s ---> %s\n" % (str(A.IP()), str(V.IP())))
-        p1 = A.popen(['hping3', '-i', self.__ipps,
-                                '--rand-source',
-                                V.IP()])
+
         [tiempo,intervalo] = self.getPingParameters()
+        print tiempo,intervalo
         info("Starting Pings: %s ---> %s\n" % (str(C.IP()), str(V.IP())))
         p2 = C.popen(['ping', str(V.IP()),
                                '-i', str(intervalo),
                                '-c', str(tiempo)],
                               stdout=PIPE)
+        info("Launch attack: %s ---> %s\n" % (str(A.IP()), str(V.IP())))
+        p1 = A.popen(['hping3', '-i', self.__ipps,
+                      '--rand-source',
+                      V.IP()])
         for line in p2.stdout:
             # sys.stdout.write(line)
             logfile.write(line)
@@ -114,7 +133,7 @@ class PingMeasureAttack(PingMeasure):
 
 def test1():
     info('*** Create the file config \n')
-    medida = PingMeasure()
+    medida = PingMeasure(outfile='ping_measure_200.out', t_total=200, intervalo=0.5)
 
     "Create Simple topology example."
     net = Mininet(switch=OVSSwitch, build=False, link=TCLink)
@@ -153,8 +172,7 @@ def test1():
 
 def test2():
     info('*** Create the file config \n')
-    medida = PingMeasureAttack()
-
+    medida = PingMeasureAttack(outfile='ping_measure_200.out', t_total=200, intervalo=0.5)
     "Create Simple topology example."
     net = Mininet(switch=OVSSwitch, build=False, link=TCLink)
     net.addController('c0', controller=RemoteController, ip="127.0.0.1", port=6653)
@@ -165,6 +183,7 @@ def test2():
     h2 = net.addHost('h2', ip='10.0.0.2')  # Atacante
     h3 = net.addHost('h3', ip='10.0.0.3')  # Victima
     medida.configAttack(h2,h3,h1,'u500')
+    medida.printConfiguration()
 
 
     # Add switches
@@ -188,8 +207,7 @@ def test2():
     info('*** Stopping network')
     net.stop()
     medida.printOutputFile()
-    medida.formatFile()
-
+    medida.formatFile(medida.getFileName()[:medida.getFileName().find(".")])
 
 
 if __name__ == "__main__":
