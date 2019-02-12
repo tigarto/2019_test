@@ -40,14 +40,16 @@ El resultado en ambos casos será un archivo de salida y su correspondiente vers
 3. Documentar.
 ----
 ## Doing ##
-1. Colocar en el encabezado de los cvs las unidades.
-2. Imprimir las estadisticas del ping (obtenidas del metodo que se hizo para ello).
-3. Hacer el programa para obtener estadisticas.
+
+2. Hacer el programa para obtener estadisticas.
 ----
 ## Done ##
 1. Automatización del ataque y medidas (Muy basico).
 2. Pruebas manuales (ver [enlace](https://github.com/tigarto/2019_test/blob/master/febrero/04/README.md))
-3. Generando replicas para el ataque
+3. Generando replicas para el ataque.
+4. Colocar en el encabezado de los cvs las unidades.
+5. Imprimir las estadisticas del ping (obtenidas del metodo que se hizo para ello).
+   
 ----
 ## Notas ##
 Lo que se lleva no esta libre de bugs.
