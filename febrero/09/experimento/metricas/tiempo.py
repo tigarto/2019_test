@@ -29,6 +29,7 @@ class PingMeasure(object):
         return [self.__t_total, self.__intervalo]
 
     def medir(self):
+        sleep(1)
         info("Starting Pings: %s ---> %s\n"%(str(self.__hSrc.IP()),str(self.__hDst.IP())))
         logfile = open(self.__outfile, 'w')
         p = self.__hSrc.popen(['ping', str(self.__hDst.IP()),
@@ -105,6 +106,7 @@ class PingMeasureAttack(PingMeasure):
 
         [tiempo,intervalo] = self.getPingParameters()
         print tiempo,intervalo
+        sleep(1)
         info("Starting Pings: %s ---> %s\n" % (str(C.IP()), str(V.IP())))
         p2 = C.popen(['ping', str(V.IP()),
                                '-i', str(intervalo),
@@ -120,7 +122,7 @@ class PingMeasureAttack(PingMeasure):
         p2.wait()
 
         logfile.close()
-        p1.kill()
+        #p1.kill()
         info("*** End attack measure ***\n")
 
     def printOutputFile(self):
