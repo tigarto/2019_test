@@ -19,6 +19,7 @@ class IperfMeasure(object):
         self.hDst = hDst
 
     def medirBW(self):
+        sleep(1)
         info("Starting Iperf: %s ---> %s\n"%(str(self.hSrc.IP()),str(self.hDst.IP())))
         p1 = self.hDst.popen(['iperf', '-s']) # Iniciando el servidor
         logfile = open(self.outfile, 'w')
@@ -67,6 +68,7 @@ class BWMeasureAttack(IperfMeasure):
         self.ipps = ipps
 
     def medirBWAtaque(self):
+        sleep(1)
         info("*** Starting iperf measure ***\n")
         p1 = self.hDst.popen(['iperf', '-s'])
         logfile = open(self.outfile, 'w')
@@ -81,7 +83,7 @@ class BWMeasureAttack(IperfMeasure):
             logfile.write(line)
         p2.wait()
         logfile.close()
-        p3.kill()
+        #p3.kill()
         info("*** End iperf attack ***\n")
 
     def printOutputFile(self):
