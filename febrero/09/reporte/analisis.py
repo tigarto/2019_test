@@ -100,6 +100,12 @@ class Reporte(object):
     
     def obtenerRTTPromedio(self):
         return self.metricas_ping['rtt_avg'].mean()
+
+    def obtenerMetricasIperf(self):
+        return self.metricas_iperf
+    
+    def obtenerMetricasPing(self):
+        return self.metricas_ping
     
 
 
@@ -189,6 +195,14 @@ if __name__ == "__main__":
     # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.plot.html
     
     datosGraficas = pd.DataFrame({'BW': BW_avg,'RTT': rtt_avg}, index=reportes.keys())
+
+    for k in reportes:
+        reportes[k].obtenerMetricasIperf().to_csv('iperf_' + k + '.csv',sep=';')
+        reportes[k].obtenerMetricasPing().to_csv('ping_' + k + '.csv',sep=';')
+        
+    datosGraficas.to_csv('resumen.csv',sep=';')
+
+
     axes = datosGraficas.plot.bar(rot=0, subplots=True)
     axes[1].legend(loc=2)  # doctest: +SKIP
     plt.show()
@@ -206,6 +220,13 @@ if __name__ == "__main__":
     rtt_avg_s.plot.bar(x='rata', y='mbps', rot=0)
     plt.show()
     """
+
+    """
+    Save dataframe as cvs
+    https://chrisalbon.com/python/data_wrangling/pandas_saving_dataframe_as_csv/
+    """
+
+    
 
 
 
