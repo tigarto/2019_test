@@ -164,6 +164,7 @@ def test1():
 
     info('*** Starting network\n')
     net.start()
+    sleep(1)
     medida.medir()
 
     info('*** Stopping network')
