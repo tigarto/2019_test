@@ -4,7 +4,7 @@
 
 A continuación se muestra la topologia que se empleo para el experimento, asi mismo se resalta el trafico empleado para las pruebas:
 
-[!topologiaTest](topologiaTest.png)
+![topologiaTest](topologiaTest.png)
 
 Para el caso las herramientas empleadas para la generación de trafico fueron:
 1. **Trafico de ataque (DoS)**: hping3
