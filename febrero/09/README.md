@@ -1,5 +1,15 @@
 # Experimento #
 ----
+## Topologia experimental ##
+
+A continuación se muestra la topologia que se empleo para el experimento, asi mismo se resalta el trafico empleado para las pruebas:
+
+[!topologiaTest](topologiaTest.png)
+
+Para el caso las herramientas empleadas para la generación de trafico fueron:
+1. **Trafico de ataque (DoS)**: hping3
+2. **Trafico de medicion**: iperf, ping.
+
 ## Pruebas basicas ##
 
 ### Prueba medicion del ping ###
@@ -149,8 +159,9 @@ Hay problemas con la parte en la cual se lanzan los experimentos, pues a veces p
 ----
 ## ToDo ##
 
-
-
+1. Corregir bug.
+2. Agregar mas metricas.
+3. Piede que bajar el ancho de banda de 100Mbps a otro valor menor muestre una mejor evidencia del impacto.
 
 ----
 ## Doing ##
