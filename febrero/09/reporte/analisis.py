@@ -111,7 +111,8 @@ class Reporte(object):
 
 
 if __name__ == "__main__":
-    dir_root_results = "salidas"
+    dir_root_results = "salidas_50_1" # Nombre del directorio que con los archivos de
+                                      # salida a convetir
     files_out = []
     summaryPing = []
     summaryIperf = []
@@ -124,13 +125,10 @@ if __name__ == "__main__":
     for f in files:
         if ".out" in f:
             files_out.append(f)
-
     
     for f in files_out:
-        # print f
         if "iperf" in f:
             summaryIperf.append({'file':f,'iperf_s':iperfFormatFile(f)})
-
         else:
             summaryPing.append({'file':f,'ping_s':pingFormatFile(f)})
     
@@ -175,7 +173,6 @@ if __name__ == "__main__":
         print "Ping",k
         reportes[k].imprimirResumenPing()
         print '\n'        
-
     """
     # Obteniendo estadisticas para las graficas
     BW_avg = []
@@ -187,13 +184,7 @@ if __name__ == "__main__":
 
     #print BW_avg
     #print rtt_avg
-    
-    # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.plot.bar.html   
-    # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.plot.bar.html
-    # https://www.tutorialspoint.com/python_pandas/python_pandas_series.htm
-    # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.plot.bar.html
-    # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.plot.html
-    
+        
     datosGraficas = pd.DataFrame({'BW': BW_avg,'RTT': rtt_avg}, index=reportes.keys())
 
     for k in reportes:
@@ -202,12 +193,13 @@ if __name__ == "__main__":
         
     datosGraficas.to_csv('resumen.csv',sep=';')
 
+    """
 
     axes = datosGraficas.plot.bar(rot=0, subplots=True)
     axes[1].legend(loc=2)  # doctest: +SKIP
     plt.show()
 
-    """
+    
     BW_avg_s = pd.Series(BW_avg, index=reportes.keys())
     rtt_avg_s = pd.Series(rtt_avg, index=reportes.keys())
     print BW_avg_s
