@@ -19,9 +19,10 @@ class IperfMeasure(object):
         self.hDst = hDst
 
     def medirBW(self):
-        sleep(1)
+        #sleep(1)
         info("Starting Iperf: %s ---> %s\n"%(str(self.hSrc.IP()),str(self.hDst.IP())))
         p1 = self.hDst.popen(['iperf', '-s']) # Iniciando el servidor
+        #print self.hDst.cmd( 'iperf -s &')   
         logfile = open(self.outfile, 'w')
         p2 = self.hSrc.popen(['iperf', '-c', str(self.hDst.IP()), '-i', str(self.intervalo),
                          '-t ' + str(self.t_total)], stdout=PIPE)
@@ -68,16 +69,18 @@ class BWMeasureAttack(IperfMeasure):
         self.ipps = ipps
 
     def medirBWAtaque(self):
-        sleep(1)
-        info("*** Starting iperf measure ***\n")
-        p1 = self.hDst.popen(['iperf', '-s'])
-        logfile = open(self.outfile, 'w')
-
-        p2 = self.hM.popen(['iperf', '-c', str(self.hDst.IP()), '-i', str(self.intervalo),
-                      '-t ' + str(self.t_total)], stdout=PIPE)
+        #sleep(1)
+        info("Launch attack: %s ---> %s\n" % (str(self.hSrc.IP()), str(self.hDst.IP())))
         p3 = self.hSrc.popen(['hping3', '-i', self.ipps,
                               '--rand-source',
                               self.hDst.IP()])
+        sleep(1)
+        info("*** Starting iperf measure ***\n")
+        p1 = self.hDst.popen(['iperf', '-s'])
+        #print self.hDst.cmd( 'iperf -s &')   
+        logfile = open(self.outfile, 'w')
+        p2 = self.hM.popen(['iperf', '-c', str(self.hDst.IP()), '-i', str(self.intervalo),
+                      '-t ' + str(self.t_total)], stdout=PIPE)        
         for line in p2.stdout:
             # sys.stdout.write(line)
             logfile.write(line)
@@ -166,6 +169,7 @@ def test2():
 
     info('*** Starting network\n')
     net.start()
+    sleep(1)
     iperfM.medirBWAtaque()
 
     info('*** Stopping network')
