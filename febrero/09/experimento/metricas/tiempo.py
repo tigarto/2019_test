@@ -103,19 +103,19 @@ class PingMeasureAttack(PingMeasure):
     def medirAtaque(self):
         logfile = open(self.getFileName(), 'w')
         [A,V,C] = self.getHosts()
-
         [tiempo,intervalo] = self.getPingParameters()
         print tiempo,intervalo
+        info("Launch attack: %s ---> %s\n" % (str(A.IP()), str(V.IP())))
+        p1 = A.popen(['hping3', '-i', self.__ipps,
+                      '--rand-source',
+                      V.IP()])
         sleep(1)
         info("Starting Pings: %s ---> %s\n" % (str(C.IP()), str(V.IP())))
         p2 = C.popen(['ping', str(V.IP()),
                                '-i', str(intervalo),
                                '-c', str(tiempo)],
                               stdout=PIPE)
-        info("Launch attack: %s ---> %s\n" % (str(A.IP()), str(V.IP())))
-        p1 = A.popen(['hping3', '-i', self.__ipps,
-                      '--rand-source',
-                      V.IP()])
+        
         for line in p2.stdout:
             # sys.stdout.write(line)
             logfile.write(line)
