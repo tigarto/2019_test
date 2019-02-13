@@ -1,0 +1,2 @@
+;p_tx;p_rx;p_loss;time;rtt_min;rtt_avg;rtt_max;rtt_mdev
+0;50.0;50.0;0.0;50156.0;0.017;0.123;4.385;0.609
