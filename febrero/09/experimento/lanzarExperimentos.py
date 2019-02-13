@@ -186,8 +186,8 @@ if __name__ == "__main__":
         '8kpps':'u125',
         '10kpps':'u100'     
     }
-    num_replicas = 2
-    t_total = 10
+    num_replicas = 1
+    t_total = 50
     # Generando los directorios para las pruebas
     for k in parametros_experimento:
         sleep(1)
