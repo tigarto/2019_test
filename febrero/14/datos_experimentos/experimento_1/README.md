@@ -78,6 +78,7 @@ hping3 --flood IP_VICTIMA --rand-source
 
 | Velociad del ataque | Intervalo -i |
 |----------|----------------|
+| normal   | ---- |
 | 2 kpps   | 500 us              |
 | 4 kpps   | 250 us              |
 | 6 kpps   | 166 us              |
@@ -261,6 +262,24 @@ iperf -c 10.0.0.3 -i 1 -t 200 > iperf_flooding.out
 
 El resultado de la medición es un archivo de texto con la salida del comando iperf en el cliente. Para este caso el archivo se llama **iperf_flood.out**
 
+
+* **Test 7**: Caso normal (sin ataque)
+
+```bash
+# Terminal controlador
+sudo ryu-manager --verbose simple_switch_13.py ofctl_rest.py
+
+# Terminal mininet
+sudo mn --topo=single,3 --mac --switch=ovsk,protocols=OpenFlow13 --controller=remote,ip=127.0.0.1:6653  --link=tc,bw=100
+
+# Terminal h3
+iperf -s
+
+# Terminal h2
+iperf -c 10.0.0.3 -i 1 -t 200 > iperf_normal.out
+```
+
+El resultado de la medición es un archivo de texto con la salida del comando iperf en el cliente. Para este caso el archivo se llama **iperf_normal.out**
 
 ## Referencias ##
 
