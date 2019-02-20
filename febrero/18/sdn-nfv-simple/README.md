@@ -34,9 +34,9 @@ sudo mn --topo single,3 --mac --controller=remote
 sh ovs-ofctl add-flow s1 priority=1,in_port=1,actions=output:flood
 sh ovs-ofctl add-flow s1 priority=1,in_port=2,actions=output:flood
 sh ovs-ofctl add-flow s1 priority=1,in_port=3,actions=output:flood
-sh ovs-ofctl add-flow s1 priority=10,ETH_TYPE = 0x0800,nw_dst=10.0.0.1,actions=output:1
-sh ovs-ofctl add-flow s1 priority=10,ETH_TYPE = 0x0800,nw_dst=10.0.0.2,actions=output:2
-sh ovs-ofctl add-flow s1 priority=10,ETH_TYPE = 0x0800,nw_dst=10.0.0.3,actions=output:3
+sh ovs-ofctl add-flow s1 priority=10,dl_type=0x0800,nw_dst=10.0.0.1,actions=output:1
+sh ovs-ofctl add-flow s1 priority=10,dl_type=0x0800,nw_dst=10.0.0.2,actions=output:2
+sh ovs-ofctl add-flow s1 priority=10,dl_type=0x0800,nw_dst=10.0.0.3,actions=output:3
 ```
 
 * Iniciar las aplicaciones tanto en H1 como en H2
@@ -48,11 +48,8 @@ Lanzanddo las terminales de los hosts:
 xterm h1 h2
 ```
 
-
-
 ```bash
 # Terminal h2
-python 
 python udp_receive.py 
 
 ```
@@ -75,10 +72,19 @@ With the following rules, H1 send one packet and H2 can receive two packets. (No
 sh ovs-ofctl add-flow s1 priority=100,in_port=1,actions=mod_dl_dst:00:00:00:00:00:03,mod_nw_dst:10.0.0.3,output:3
 ```
 
- 
+A continuacion se muestran los flujos anteriormente instalados:
 
 ```bash
-sh ovs-ofctl add-flow s1 priority=100,in_port=1,actions=mod_dl_dst:00:00:00:00:00:03,mod_nw_dst:10.0.0.3,output:3
+# Terminal switch ovs
+sudo ovs-ofctl dump-flows s1
+NXST_FLOW reply (xid=0x4):
+ cookie=0x0, duration=39.742s, table=0, n_packets=0, n_bytes=0, idle_age=39, priority=1,in_port=1 actions=FLOOD
+ cookie=0x0, duration=39.736s, table=0, n_packets=1, n_bytes=70, idle_age=23, priority=1,in_port=2 actions=FLOOD
+ cookie=0x0, duration=39.732s, table=0, n_packets=1, n_bytes=70, idle_age=26, priority=1,in_port=3 actions=FLOOD
+ cookie=0x0, duration=30.931s, table=0, n_packets=1, n_bytes=70, idle_age=23, priority=100,in_port=1 actions=mod_dl_dst:00:00:00:00:00:03,mod_nw_dst:10.0.0.3,output:3
+ cookie=0x0, duration=39.728s, table=0, n_packets=0, n_bytes=0, idle_age=39, priority=10,ip,nw_dst=10.0.0.1 actions=output:1
+ cookie=0x0, duration=39.722s, table=0, n_packets=0, n_bytes=0, idle_age=39, priority=10,ip,nw_dst=10.0.0.2 actions=output:2
+ cookie=0x0, duration=38.688s, table=0, n_packets=0, n_bytes=0, idle_age=38, priority=10,ip,nw_dst=10.0.0.3 actions=output:3
 ```
 
 ## Referencias ##
