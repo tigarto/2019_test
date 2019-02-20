@@ -34,9 +34,9 @@ sudo mn --topo single,3 --mac --controller=remote
 sh ovs-ofctl add-flow s1 priority=1,in_port=1,actions=output:flood
 sh ovs-ofctl add-flow s1 priority=1,in_port=2,actions=output:flood
 sh ovs-ofctl add-flow s1 priority=1,in_port=3,actions=output:flood
-sh ovs-ofctl add-flow s1 priority=10,dl_type=0x0800,nw_dst=10.0.0.1,actions=output:1
-sh ovs-ofctl add-flow s1 priority=10,dl_type=0x0800,nw_dst=10.0.0.2,actions=output:2
-sh ovs-ofctl add-flow s1 priority=10,dl_type=0x0800,nw_dst=10.0.0.3,actions=output:3
+sh ovs-ofctl add-flow s1 priority=10,ETH_TYPE = 0x0800,nw_dst=10.0.0.1,actions=output:1
+sh ovs-ofctl add-flow s1 priority=10,ETH_TYPE = 0x0800,nw_dst=10.0.0.2,actions=output:2
+sh ovs-ofctl add-flow s1 priority=10,ETH_TYPE = 0x0800,nw_dst=10.0.0.3,actions=output:3
 ```
 
 * Iniciar las aplicaciones tanto en H1 como en H2
