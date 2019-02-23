@@ -14,6 +14,11 @@ Proceso de test:
 sudo ryu-manager --verbose simple_switch_13.py ofctl_rest.py
 sudo python experimento.py
 
+Experimento manual:
+sudo ryu-manager --verbose simple_switch_13.py ofctl_rest.py
+sudo mn --custom experimento_simple1.py --topo topotest --test mytest --controller=remote,ip=127.0.0.1:6653
+
+
 """
 
 class TopologiaExperimento(Topo):
@@ -36,6 +41,8 @@ class TopologiaExperimento(Topo):
         self.addLink(h1, sw1, bw=100)
         self.addLink(h2, sw1, bw=100)
         self.addLink(h3, sw1, bw=100)
+
+topos = { 'topotest': ( lambda: TopologiaExperimento() ) }
 
 def launchController():
     return_code = subprocess.call("gnome-terminal --command='./run_controller.sh'", shell=True)
