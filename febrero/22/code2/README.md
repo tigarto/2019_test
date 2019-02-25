@@ -13,10 +13,19 @@
 
 ## Casos de test ##
 
-Se invoco una topologia en mininet en la que se invoco la consola para ejecutar los comandos que se desearan. A continuación de muestra el comando de ejecución:
+### Forma 1 ###
+
+El script [unidad_experimental1.py](unidad_experimental1.py) lanza una nueva consola que ejecuta el controlador y posteriormente lanza la consola de mininet (CLI) para ejecutar diferentes comandos. Cuando sale de mininet se limpia la red. El comando de invocación se muestra a continuación:
 
 ```bash
-sudo python unidad_experimental.py
+sudo python unidad_experimental1.py
 ```
 
-**Código**: [unidad_experimental.py](unidad_experimental.py)
+### Forma 2 ###
+
+El script [unidad_experimental2.py](unidad_experimental2.py) hace lo mismo pero es mediante mininet que se lanzar el controlador (no se despliega consola de este para nada). A continuación se muestra el comando de ejecución.
+
+```bash
+sudo python unidad_experimental2.py
+```
+
