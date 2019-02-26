@@ -1,0 +1,37 @@
+1. Snnifing 
+2. sql o archivos
+3. cpu
+
+
+http://www.brianlinkletter.com/using-pox-components-to-create-a-software-defined-networking-application/
+http://www.brianlinkletter.com/visualizing-software-defined-network-topologies-using-pox-and-gephi/
+
+
+
+http://www.brianlinkletter.com/using-the-opendaylight-sdn-controller-with-the-mininet-network-emulator/
+
+https://github.com/topics/software-defined-network
+
+Tesis:
+https://github.com/abulanov/sfc_app
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5081987/
+
+
+
+Mirar de pronto como me puedo ahorrar lo de ping:
+https://github.com/anastop/latte
+
+
+https://github.com/intrig-unicamp/BB-Gen
+https://github.com/Bambil/SDNFV101 (wilmar)
+
+
+Seguridad:
+https://github.com/gdellapenna/BotNet-SDN-ML
+
+
+Ver: https://github.com/rishdas/secure_pox_l2_learning_switch
+
+https://github.com/radicallyopensecurity/anti-ddos/wiki/DDoS-Attack-Research
+
+
