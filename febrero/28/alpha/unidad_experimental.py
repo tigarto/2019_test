@@ -105,36 +105,17 @@ class TraficoNormal(Trafico):
             info("Starting iperf server\n")
             h_V.cmdPrint('iperf', '-s', '&')
             h_C.cmdPrint('iperf', '-c', h_V.IP(), '-i', intervalo, '-t ', tiempo)
+            h_V.cmdPrint('kill %iperf')
             print("*** End iperf measure ***\n")
 
         else:
             info("Starting iperf server")
             h_V.cmdPrint('iperf', '-s', '&')
             h_C.cmd('iperf', '-c', h_V.IP(), '-i', intervalo, '-t ', tiempo, '>', filename)
+            h_V.cmdPrint('kill %iperf')
             print("*** End iperf measure ***\n")
 
 
-            """
-            info("Starting iperf server")
-            logfile = open(filename, 'w')
-            iperf_process_server = h_V.popen(['iperf', '-s'])  # Iniciando el servidor
-
-            if iperf_process_server != 0:
-                info("Starting Iperf: %s ---> %s\n" % (str(h_C.IP()), str(h_V.IP())))
-                iperf_process_client = h_C.popen(['iperf', '-c', str(h_V.IP()),
-                                                  '-i', str(intervalo),
-                                                  '-t ' + str(tiempo)],
-                                                 stdout=PIPE)
-                if iperf_process_client == 0:
-                    for line in iperf_process_client.stdout:
-                        logfile.write(line)
-                    logfile.close()
-                else:
-                    iperf_process_client.wait()
-                    iperf_process_server.kill()
-                    info("*** End iperf measure ***\n")
-                    
-            """
 
 
 
@@ -154,47 +135,35 @@ class TraficoAtaque(Trafico):
         h_C = h_src
         h_V = h_dst
         h_A = h_atk
-        if h_src == None and h_dst == None:
+        tiempo_start = 3
+        if h_src == None and h_dst == None and h_atk == None:
             h_C = self.src
             h_V = self.dst
             h_A = self.atk
-        if filename == None:
             if self.tipo_ataque == 1:
-                process_attack = h_A.popen(['hping3', '--flood',
-                              '--rand-source',
-                              h_V.IP()])
-                if process_attack == 0:
+                if filename == None:
                     info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
-                else:
-                    ping_process = h_C.popen(['ping', str(h_V.IP()),
-                                              '-i', str(intervalo),
-                                              '-c', str(veces)])
-                    if ping_process != 0:
-                        ping_process.wait()
-                        process_attack.kill()
-            else:
-                logfile = open(filename, 'w')
-                process_attack = h_A.popen(['hping3', '--flood',
-                                            '--rand-source',
-                                            h_V.IP()])
-                if process_attack == 0:
-                    info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
-                else:
-                    info("Starting Pings: %s ---> %s\n" % (str(h_C.IP()), str(h_V.IP())))
-                    ping_process = h_C.popen(['ping', str(h_V.IP()),
-                                  '-i', str(intervalo),
-                                  '-c', str(veces)],
-                                 stdout=PIPE)
-                    if ping_process == 0:
-
-                        for line in ping_process.stdout:
-                            logfile.write(line)
-                        logfile.close()
+                    process_attack = h_A.popen(['hping3', '--flood',
+                                                '--rand-source',
+                                                h_V.IP()])
+                    if (process_attack != 0):
+                        # sleep(tiempo_start)
+                        info("Starting pings ***\n")
+                        h_C.cmdPrint('ping -c', veces, '-i', intervalo, str(h_V.IP()))
                         info("End pings ***\n")
-                    else:
-                        ping_process.wait()
                         process_attack.kill()
-                        info("End attack ***\n")
+                else:
+                    info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
+                    process_attack = h_A.popen(['hping3', '--flood',
+                                                '--rand-source',
+                                                h_V.IP()])
+                    if (process_attack != 0):
+                        # sleep(tiempo_start)
+                        info("Starting pings ***\n")
+                        h_C.cmd('ping -c', veces, '-i', intervalo, str(h_V.IP()),'>',filename)
+                        info("End pings ***\n")
+                        process_attack.kill()
+                        h_V.cmd('kill %iperf')
 
     def iperfMeasure(self,
                      h_atk=None,
@@ -207,57 +176,36 @@ class TraficoAtaque(Trafico):
         h_C = h_src
         h_V = h_dst
         h_A = h_atk
-        if h_src == None and h_dst == None:
+        tiempo_start = 3
+        if h_src == None and h_dst == None and h_atk == None:
             h_C = self.src
             h_V = self.dst
             h_A = self.atk
-        if filename == None:
-            if self.tipo_ataque == 1:
+        if self.tipo_ataque == 1:
+            if filename == None:
+                info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
                 process_attack = h_A.popen(['hping3', '--flood',
-                              '--rand-source',
-                              h_V.IP()])
-                if process_attack == 0:
-                    info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
-                else:
-                    iperf_process_server = h_V.popen(['iperf', '-s'])  # Iniciando el servidor
-                    if iperf_process_server == 0:
-                        info("Starting iperf server")
-                        iperf_process_client = h_C.popen(['iperf', '-c', str(h_V.IP()),
-                                                          '-i', str(intervalo),
-                                                          '-t ' + str(tiempo)])
-                        if iperf_process_client == 0:
-                            info("Starting Iperf: %s ---> %s\n" % (str(h_C.IP()), str(h_V.IP())))
-                        else:
-                            iperf_process_client.wait()
-                            iperf_process_server.kill()
-                            process_attack.kill()
-                            info("*** End iperf attack measure ***\n")
-        else:
-            if self.tipo_ataque == 1:
+                                            '--rand-source',
+                                            h_V.IP()])
+                if process_attack != 0:
+                    # sleep(tiempo_start)
+                    info("Starting iperf server\n")
+                    h_V.cmdPrint('iperf', '-s', '&')
+                    #sleep(tiempo_start)
+                    h_C.cmdPrint('iperf', '-c', h_V.IP(), '-i', intervalo, '-t ', tiempo)
+                    print("*** End iperf measure ***\n")
+            else:
+                info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
                 process_attack = h_A.popen(['hping3', '--flood',
-                              '--rand-source',
-                              h_V.IP()])
-                if process_attack == 0:
-                    info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
-                else:
-                    iperf_process_server = h_V.popen(['iperf', '-s'])  # Iniciando el servidor
-                    logfile = open(filename, 'w')
-                    if iperf_process_server == 0:
-                        info("Starting iperf server")
-                        iperf_process_client = h_C.popen(['iperf', '-c', str(h_V.IP()),
-                                                          '-i', str(intervalo),
-                                                          '-t ' + str(tiempo)],
-                                                         stdout=PIPE)
-                        if iperf_process_client == 0:
-                            info("Starting Iperf: %s ---> %s\n" % (str(h_C.IP()), str(h_V.IP())))
-                            for line in iperf_process_client.stdout:
-                                logfile.write(line)
-                            logfile.close()
-                        else:
-                            iperf_process_client.wait()
-                            iperf_process_server.kill()
-                            process_attack.kill()
-                            info("*** End iperf attack measure ***\n")
+                                            '--rand-source',
+                                            h_V.IP()])
+                if process_attack != 0:
+                    # sleep(tiempo_start)
+                    info("Starting iperf server\n")
+                    h_V.cmdPrint('iperf', '-s', '&')
+                    h_C.cmd('iperf', '-c', h_V.IP(), '-i', intervalo, '-t ', tiempo, '>', filename)
+                    print("*** End iperf measure ***\n")
+
 
 
 class UnidadExperimental:
@@ -315,14 +263,16 @@ class Experimento:
     # Metodo para configurar el trafico
     def configurarTrafico(self, tipo = 'normal'):
         nodos_claves = self.inputs.obtenerNodosClaves()
-        print(nodos_claves)
         if tipo == 'normal':
-            nodos_claves = self.inputs.obtenerNodosClaves()
             h_c = self.net.get(nodos_claves[1])
             h_v = self.net.get(nodos_claves[2])
-            print (type(h_c))
-            print("----------------------------------------------------")
             self.trafico = TraficoNormal(h_c,h_v)
+        elif tipo == 'ataque':
+            h_a = self.net.get(nodos_claves[0])
+            h_c = self.net.get(nodos_claves[1])
+            h_v = self.net.get(nodos_claves[2])
+            self.trafico = TraficoAtaque(h_a,h_c,h_v)
+
 
     def killTest(self):
         subprocess.call(["mn", "-c"])
@@ -446,12 +396,72 @@ def test4():
     info("Removiendo el controlador\n")
     exp1.killController()  # Si no se pone no se finaliza el controlador
 
+def test5():
+    """ Prueba con ping normal """
+    setLogLevel("info")
+    info("Configuracion Unidad experimental")
+    """ 1 -> Definicion de la topologia """
+    t1 = Topologia1()
+    ue1 = UnidadExperimental()
+    ue1.setTopo(t1)
+    ue1.definirNodosClaves(A = 'h1', C='h2', V='h3')  # Caso solo para trafico normal
+    ue1.setController('ryu', 'simple_switch_13.py,ofctl_rest.py')
+    info("Configuracion del experimento")
+    """ 3. Confiracion del experimento """
+    exp1 = Experimento()
+    exp1.configureParams(ue1)
+    exp1.configurarTrafico('ataque')
+    """ 4. Inicio del experimento """
+    exp1.startTest()
+    exp1.pingAllTest()  # **************** Parece que es necesario que se de un arranque al controlador
+                        # **************** para que aprenda las reglas antes del ataque.
+
+    """ 5. Aplicacion de pruebas """
+    exp1.trafico.pingMeasure()
+    #exp1.trafico.pingMeasure(filename='ping_ataque_test.log')
+    """ 6. Fin del experimento """
+    exp1.endTest()
+    info("Removiendo la topologia\n")
+    exp1.killTest()
+    info("Removiendo el controlador\n")
+    exp1.killController()  # Si no se pone no se finaliza el controlador
+
+def test6():
+    """ Prueba con ping normal """
+    setLogLevel("info")
+    info("Configuracion Unidad experimental")
+    """ 1 -> Definicion de la topologia """
+    t1 = Topologia1()
+    ue1 = UnidadExperimental()
+    ue1.setTopo(t1)
+    ue1.definirNodosClaves(A = 'h1', C='h2', V='h3')  # Caso solo para trafico normal
+    ue1.setController('ryu', 'simple_switch_13.py,ofctl_rest.py')
+    info("Configuracion del experimento")
+    """ 3. Confiracion del experimento """
+    exp1 = Experimento()
+    exp1.configureParams(ue1)
+    exp1.configurarTrafico('ataque')
+    """ 4. Inicio del experimento """
+    exp1.startTest()
+    """ 5. Aplicacion de pruebas """
+    exp1.trafico.iperfMeasure()
+    exp1.trafico.iperfMeasure(filename='iperf_ataque_test.log')
+    """ 6. Fin del experimento """
+    exp1.endTest()
+    info("Removiendo la topologia\n")
+    exp1.killTest()
+    info("Removiendo el controlador\n")
+    exp1.killController()  # Si no se pone no se finaliza el controlador
+
 
 if __name__ == "__main__":
     # test1()    # OK
     # test2()    # OK
     # test3()    # Prueba con ping normal (consola y archivo) - OK
-    test4()
+    # test4()    # Prueba con iperf normal (consola y archivo) - OK ** No se ve la cosa en pantalla
+    test5()
+    # test6()
+
 
 
 
