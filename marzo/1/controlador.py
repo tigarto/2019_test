@@ -10,6 +10,7 @@ import psutil
 from mininet.cli import CLI
 from subprocess import Popen, PIPE, STDOUT
 from select import poll, POLLIN
+from os import environ
 
 class RYU( Controller ):
     def __init__(self, name, ryuArgs = 'simple_switch_13.py', **kwargs):
@@ -18,14 +19,16 @@ class RYU( Controller ):
                             cargs='--ofp-tcp-listen-port %s ' + ryuArgs,
                             **kwargs)
 
-POXDIR = os.environ[ 'HOME' ] + '/pox'
+POXDIR = environ[ 'HOME' ] + '/pox-1.3'
 
 class POX( Controller ):
     def __init__( self, name, cdir=POXDIR,
                   command='python pox.py',
-                  cargs=( 'openflow.of_01 --port=%s '
-                          'forwarding.l2_learning' ),
+                  poxArgs = 'forwarding.l2_learning_04',
                   **kwargs ):
+        if poxArgs == None:
+            poxArgs = 'forwarding.l2_learning_04'
+        cargs = 'openflow.of_04 --port=%s ' + poxArgs
         Controller.__init__( self, name, cdir=cdir,
                              command=command,
                              cargs=cargs, **kwargs )

@@ -12,7 +12,7 @@ from subprocess import Popen, PIPE, STDOUT
 from select import poll, POLLIN
 from trafico import TraficoAtaque, TraficoNormal
 from unidadExperimental import UnidadExperimental
-from topologia import TopologiaPOX, TopologiaRyu
+from topologia import TopologiaPOX, TopologiaRyu, TopologiaTest
 from controlador import RYU, POX
 from experimento import Experimento
 import dexpy.factorial
@@ -31,14 +31,15 @@ controladores = {
 
 topologias = {
     'topoRyu':TopologiaRyu(),
-    'topoPOX':TopologiaPOX()
+    'topoPOX':TopologiaPOX(),
+    'topoTest':TopologiaTest()
 }
 
 """ Caso Ryu-Normal """
 def experimentoRyuNormal():
     # Unidad experimental
     ryu_normal = UnidadExperimental()
-    ryu_normal.setTopo(topologias['topoRyu'])
+    ryu_normal.setTopo(topologias['topoTest'])
     ryu_normal.setController('ryu')
     ryu_normal.definirNodosClaves(C = 'h2', V = 'h3')
     # Experimento
@@ -50,8 +51,8 @@ def experimentoRyuNormal():
 """ Caso Ryu-Ataque """
 def experimentoRyuAtaque():
     # Unidad experimental
-    ryu_ataque = UnidadExperimental(topologias['topoRyu'],controladores['ryu'])
-    ryu_ataque.setTopo(topologias['topoRyu'])
+    ryu_ataque = UnidadExperimental()
+    ryu_ataque.setTopo(topologias['topoTest'])
     ryu_ataque.setController('ryu')
     ryu_ataque.definirNodosClaves(A = 'h1',C = 'h2', V = 'h3')
     # Experimento
@@ -63,7 +64,9 @@ def experimentoRyuAtaque():
 """ Caso POX-Normal """
 def experimentoPOXNormal():
     # Unidad experimental
-    pox_normal = UnidadExperimental(topologias['topoPOX'],controladores['pox'])
+    pox_normal = UnidadExperimental()
+    pox_normal.setTopo(topologias['topoTest'])
+    pox_normal.setController('pox')
     pox_normal.definirNodosClaves(C = 'h2', V = 'h3')
     # Experimento
     exp_pox_normal = Experimento()
@@ -74,10 +77,13 @@ def experimentoPOXNormal():
 """ Caso POX-Ataque """
 def experimentoPOXAtaque():
     # Unidad experimental
-    pox_ataque = UnidadExperimental(topologias['topoPOX'],controladores['pox'])
+    pox_ataque = UnidadExperimental()
+    pox_ataque.setTopo(topologias['topoTest'])
+    pox_ataque.setController('pox')
     pox_ataque.definirNodosClaves(A = 'h1',C = 'h2', V = 'h3')
-    exp_pox_ataque = Experimento()
+    
     # Experimento
+    exp_pox_ataque = Experimento()
     exp_pox_ataque.configureParams(pox_ataque)
     exp_pox_ataque.configurarTrafico('ataque')
     return exp_pox_ataque
@@ -139,7 +145,7 @@ def experimentos():
     print(matrixReplicas)
     """
     rep = 1
-    ordenExperimentos = []
+    #ordenExperimentos = []
     ordenTratamientos = []
     for i in range(1,numReplicasPorTratamiento*numTratamientos + 1):
         index = np.where(matrixReplicas==rep)
@@ -231,51 +237,93 @@ def imprimirArchivosLogGenerados(listaF, num_ren = 4):
 if __name__ == "__main__":
     setLogLevel("info")
     files_log = experimentos()
+    imprimirArchivosLogGenerados(files_log)
     for fl_name in files_log:
+        print fl_name + "\n"
         fl = fl_name.strip('.log')
         test = fl.split('-')[:3]
-        # print test
         if test[0] == 'ryu':
             # RYU
             print('\n*******' + fl_name + '*******')
             if test[1] == 'normal':
                 # RYU-NORMAL
                 ryu_normal = experimentoRyuNormal()
+                sleep(5) # Dando tiempo de construccion
                 if test[2] == 'iperf':
                     # RYU-NORMAL-IPERF
                     ryu_normal.startTest()
                     sleep(10)
-                    ryu_normal.trafico.iperfMeasure(filename=fl_name)
+                    ryu_normal.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
                     ryu_normal.endTest()
                 else:
                     # RYU-NORMAL-PING
                     ryu_normal.startTest()
                     sleep(10)
-                    ryu_normal.trafico.pingMeasure(filename=fl_name)
+                    ryu_normal.trafico.pingMeasure(filename=fl_name, veces = 20)
                     ryu_normal.endTest()
                 ryu_normal.killTest()
                 ryu_normal.killController()
             else:
                 # RYU-ATAQUE
                 ryu_ataque = experimentoRyuAtaque()
+                sleep(5) # Dando tiempo de construccion
                 if test[2] == 'iperf':
                     # RYU-NORMAL-IPERF
                     ryu_ataque.startTest()
                     sleep(10)
-                    ryu_ataque.trafico.iperfMeasure(filename=fl_name)
+                    ryu_ataque.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
                     ryu_ataque.endTest()
                 else:
                     # RYU-NORMAL-PING
                     ryu_ataque.startTest()
                     sleep(10)
-                    ryu_ataque.trafico.pingMeasure(filename=fl_name)
+                    ryu_ataque.trafico.pingMeasure(filename=fl_name, veces = 20)
                     ryu_ataque.endTest()
                 ryu_ataque.killTest()
                 ryu_ataque.killController()
-        else:
+        else:           
+            # POX
             print('\n*******' + fl_name + '*******')
-            print "Aun no ensayado, ofrecemos disculpas por las molestias causadas..."
+            if test[1] == 'normal':
+                # POX-NORMAL                
+                pox_normal = experimentoPOXNormal()
+                sleep(5)
+                # Dando tiempo de construccion
+                if test[2] == 'iperf':
+                    # POX-NORMAL-IPERF
+                    pox_normal.startTest()
+                    sleep(10)
+                    pox_normal.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
+                    pox_normal.endTest()
+                else:
+                    # POX-NORMAL-PING
+                    pox_normal.startTest()
+                    sleep(10)
+                    pox_normal.trafico.pingMeasure(filename=fl_name, veces = 20)
+                    pox_normal.endTest()
+                pox_normal.killTest()
+                pox_normal.killController()
+            else:
+                sleep(10)
+                # POX-ATAQUE
+                pox_ataque = experimentoPOXAtaque()  
+                sleep(5)          
+                if test[2] == 'iperf':                    
+                    # RYU-NORMAL-IPERF
+                    pox_ataque.startTest()
+                    sleep(10)
+                    pox_ataque.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
+                    pox_ataque.endTest()
+                else:                    
+                    # RYU-NORMAL-PING
+                    pox_ataque.startTest()
+                    sleep(10)
+                    pox_ataque.trafico.pingMeasure(filename=fl_name, veces = 20)
+                    pox_ataque.endTest()
+                pox_ataque.killTest()
+                pox_ataque.killController()            
         sleep(10)
+        info("\n******* Pasando al siguiente experimento *******\n\n")
     print ("FIN EXPERIMENTOS")
 
 

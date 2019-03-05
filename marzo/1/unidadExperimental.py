@@ -30,7 +30,7 @@ class UnidadExperimental:
             self.controller = RYU(name='c0',
                                   ryuArgs =appsController)
         else:
-            self.controller = POX() # Mejorar
+            self.controller = POX(name = 'c0') # Mejorar
     def getTopo(self):
         return self.topo
 

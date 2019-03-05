@@ -8,11 +8,12 @@ from time import time, sleep
 import psutil
 from mininet.cli import CLI
 
-# 
+
 from trafico import TraficoAtaque, TraficoNormal
-from prueba_clases import UnidadExperimental
+from unidadExperimental import UnidadExperimental
 from topologia import TopologiaPOX, TopologiaRyu
 from controlador import RYU, POX
+import subprocess
 
 class Experimento:
     def __init__(self):
@@ -56,6 +57,11 @@ class Experimento:
             for proc in psutil.process_iter(attrs=['pid', 'name']):
                 if "ryu-manager" in proc.info['name']:
                     os.kill(proc.info['pid'], 9)
+        else:
+            c0 = self.net.getNodeByName('c0') # Nombre del controlador para el experimento
+            port_pox = c0.port
+            subprocess.Popen(['sudo','fuser','-k',str(port_pox)+'/tcp'])
+                
 
     def startTest(self):
         self.net.start()
@@ -147,7 +153,7 @@ def test4():
     setLogLevel("info")
     info("Configuracion Unidad experimental")
     """ 1 -> Definicion de la topologia """
-    t1 = Topologia1()
+    t1 = TopologiaRyu()
     ue1 = UnidadExperimental()
     ue1.setTopo(t1)
     ue1.definirNodosClaves(C='h2', V='h3')  # Caso solo para trafico normal
@@ -174,7 +180,7 @@ def test5():
     setLogLevel("info")
     info("Configuracion Unidad experimental")
     """ 1 -> Definicion de la topologia """
-    t1 = Topologia1()
+    t1 = TopologiaRyu()
     ue1 = UnidadExperimental()
     ue1.setTopo(t1)
     ue1.definirNodosClaves(A = 'h1', C='h2', V='h3')  # Caso solo para trafico normal
@@ -227,11 +233,39 @@ def test6():
     exp1.killController()  # Si no se pone no se finaliza el controlador
 
 
+def test7():
+    """ Prueba con ping normal """
+    setLogLevel("info")
+    info("Configuracion Unidad experimental")
+    """ 1 -> Definicion de la topologia """
+    t1 = TopologiaPOX()
+    ue1 = UnidadExperimental()
+    ue1.setTopo(t1)
+    ue1.definirNodosClaves(A = 'h1', C='h2', V='h3')  # Caso solo para trafico normal
+    ue1.setController('pox')
+    info("Configuracion del experimento")
+    """ 3. Confiracion del experimento """
+    exp1 = Experimento()
+    exp1.configureParams(ue1)
+    exp1.configurarTrafico('ataque')
+    """ 4. Inicio del experimento """
+    exp1.startTest()
+    """ 5. Aplicacion de pruebas """
+    # exp1.trafico.iperfMeasure()  # Si se lanza afecta la proxima medida.
+    exp1.trafico.iperfMeasure(filename='iperf_ataque_pox_test.log')
+    """ 6. Fin del experimento """
+    exp1.endTest()
+    info("Removiendo la topologia\n")
+    exp1.killTest()
+    info("Removiendo el controlador\n")
+    exp1.killController()  # Si no se pone no se finaliza el controlador
+
 if __name__ == "__main__":
     # test1()    # OK
     # test2()    # OK
     # test3()    # Prueba con ping normal (consola y archivo) - OK
-    # test4()    # Prueba con iperf normal (consola y archivo) - OK ** No se ve la cosa en pantalla
+    test4()    # Prueba con iperf normal (consola y archivo) - OK ** No se ve la cosa en pantalla
     # test5()    # Prueba con ping bajo ataque - Parece que OK
-    test6()      # Prueba con iperf bajo ataque (consola y archivo parece que OK) - Nota: Solo hacer un caso pues el
+    # test6()      # Prueba con iperf bajo ataque (consola y archivo parece que OK) - Nota: Solo hacer un caso pues el
                  # resultado se afecta.
+    # test7()
