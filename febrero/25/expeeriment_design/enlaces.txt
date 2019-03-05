@@ -1,0 +1,8 @@
+https://pythonhosted.org/pyDOE/
+https://towardsdatascience.com/design-your-engineering-experiment-plan-with-a-simple-python-command-35a6ba52fa35
+
+https://github.com/tirthajyoti/Design-of-experiment-Python/blob/master/DOE_functions.py
+https://statease.github.io/dexpy/
+
+fullfact([2,2])
+
