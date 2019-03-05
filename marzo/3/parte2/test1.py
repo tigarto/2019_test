@@ -12,7 +12,7 @@ import os
 
 
 
-setLogLevel( 'debug' )
+setLogLevel( 'info' )
 """
 
 # ENSAYO CON RYU --> ok

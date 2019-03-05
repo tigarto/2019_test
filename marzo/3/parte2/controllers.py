@@ -10,7 +10,7 @@ class POX( Controller ):
                   **kwargs ):
         if poxArgs == None:
             poxArgs = 'forwarding.l2_learning_04'
-        cargs = ('openflow.of_04 --port=%s ',poxArgs)
+        cargs = 'openflow.of_04 --port=%s ' + poxArgs
         Controller.__init__( self, name, cdir=cdir,
                              command=command,
                              cargs=cargs, **kwargs )
@@ -28,4 +28,3 @@ class RYU( Controller ):
 
 controllers={ 'pox': POX,
               'ryu': RYU }
-
