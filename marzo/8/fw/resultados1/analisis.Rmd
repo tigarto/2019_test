@@ -1,0 +1,88 @@
+---
+title: "R Notebook"
+output:
+  html_notebook: default
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+## Importando librerias##
+
+```{r}
+library(ggplot2)
+```
+
+
+## Cargando los datos resumen ##
+
+```{r}
+# Cargando los datos resumen
+iperf_summ.df <-read.csv("iperf_summ.csv", header=TRUE, sep = ';')
+ping_summ.df <-read.csv("ping_summ.csv", header=TRUE, sep = ';')
+```
+## Tabla resumen de cada replica para iperf##
+
+Imprimiendo los datos resumen de cada uno de los experimentos realizados:
+```{r}
+# Informacion iperf
+print(iperf_summ.df)
+# Resumen
+summary(iperf_summ.df)
+ryu_tratamientos_iperf <- levels(iperf_summ.df$trat)
+ryu_normal_replicas_iperf <- subset(iperf_summ.df,trat=="ryu-normal")
+ryu_ataque_replicas_iperf <- subset(iperf_summ.df,trat=="ryu-ataque")
+```
+### Tratamiento ryu normal (metrica iperf) ###
+
+```{r}
+print(ryu_normal_replicas_iperf)
+```
+### Tratamiento ryu ataque (metrica iperf) ###
+```{r}
+print(ryu_ataque_replicas_iperf)
+```
+
+## Tabla resumen de cada replica para ping ##
+
+```{r}
+# Informacion ping
+print(ping_summ.df)
+# Resumen
+summary(ping_summ.df)
+ryu_normal_replicas_ping <- subset(ping_summ.df,trat=="ryu-normal")
+ryu_ataque_replicas_ping <- subset(ping_summ.df,trat=="ryu-ataque")
+```
+### Tratamiento ryu normal (metrica ping) ###
+
+```{r}
+print(ryu_normal_replicas_ping)
+```
+
+### Tratamiento ryu ataque (metrica iperf) ###
+
+```{r}
+print(ryu_ataque_replicas_ping)
+```
+
+## Grafica de barras para el ancho de banda (BW) ##
+
+```{r}
+BW_normal_avg <- mean(ryu_normal_replicas_iperf$BW)
+BW_ataque_avg <- mean(ryu_ataque_replicas_iperf$BW)
+```
+
+A continuación se muestra el grafico de barras para el ancho de banda:
+
+```{r}
+barplot(c(BW_normal_avg,BW_ataque_avg ), main="Ancho de banda Promedio", 
+        xlab="Tipo de trafico", ylim = c(0,100), 
+        ylab="BW (Mbps)", names.arg=c("Normal","Ataque"))
+```
+
+## Referencias ##
+Los siguientes enlaces pueden ser de mucha utilidad:
+1. [Producing Simple Graphs with R](https://www.harding.edu/fmccown/r/)
+2[Graphical Parameters](https://www.statmethods.net/advgraphs/parameters.html)
+3. [How Big is Your Graph? An R Cheat Sheet](https://www.rstudio.com/wp-content/uploads/2016/10/how-big-is-your-graph.pdf)
+4. [R Bar Plot](https://www.datamentor.io/r-programming/bar-plot/)
