@@ -56,8 +56,6 @@ pid_child = os.fork()
 if pid_child == 0:
     # Proceso hijo
     os.system(comando)
-
-
 else:
     net.start()
     #CLI( net )
