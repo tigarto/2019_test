@@ -1,0 +1,1 @@
+Problemas de funcionamiento con el iperf de ryu. A 3 minutos ha desincronización y al parecer no se esta lanzando el proceso cliente que mide el ancho de banda. Se recomienda hacer revisiones en el codigo.
