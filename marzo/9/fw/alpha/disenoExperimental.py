@@ -20,20 +20,10 @@ import dexpy.power
 import dexpy.alias
 import pandas as pd
 import numpy as np
-import dexpy.design
+from pyDOE import fullfact
 import random
-import sys
 
-controladores = {
-    'ryu': RYU('c0',),
-    'pox': POX('c0')
-}
 
-topologias = {
-    'topoRyu':TopologiaRyu(),
-    'topoPOX':TopologiaPOX(),
-    'topoTest':TopologiaTest()
-}
 
 """ Caso Ryu-Normal """
 def experimentoRyuNormal():
@@ -108,67 +98,83 @@ Descripcion del experimento
 
 # En el momento por cuestiones de test solo van a ser dos pruebas
 
-def experimentos():
+def experimentos(numReplicasPorTratamiento = 2):
 
     # Parametros del experimento
-    numFactores = 2
-    numNiveles = 2
-    numReplicasPorTratamiento = 2
+    numNivelesFactor1 = 2
+    numNivelesFactor2 = 3    
+    
 
     # Generando los tratamientos
-    tratamientos = dexpy.factorial.build_factorial(numFactores, numFactores**numNiveles)
-    tratamientos.columns = ['controlador', 'trafico']
+    tratamientos = fullfact([numNivelesFactor1,numNivelesFactor2])
+    #tratamientos.columns = ['controlador', 'trafico']
 
     # Codificacion de los niveles
-    n1 = { 'controlador': 'ryu', 'trafico': 'normal'}
-    n2 = { 'controlador': 'pox', 'trafico': 'ataque'}
 
-    # Tratamientos codificados
-    actual_design = dexpy.design.coded_to_actual(tratamientos, n1, n2 )
-    """
+    niveles = { 'controlador': { 0:'ryu', 1:'pox'},
+                 'trafico': { 0:'normal', 1:'ataque1', 2:'ataque2'}
+    }
+    
+
+    tratamientos = tratamientos.astype(int)
+    tratamientos = tratamientos.astype(str)
+    
+    
+    # Definiendo los tratamientos
+    tratamientos[:,0][tratamientos[:,0] == '0'] = niveles['controlador'][0]
+    tratamientos[:,0][tratamientos[:,0] == '1'] = niveles['controlador'][1]
+    tratamientos[:,1][tratamientos[:,1] == '0'] = niveles['trafico'][0]
+    tratamientos[:,1][tratamientos[:,1] == '1'] = niveles['trafico'][1]
+    tratamientos[:,1][tratamientos[:,1] == '2'] = niveles['trafico'][2]
+
     print("****************** Tratamientos ******************")
-    print (actual_design)
-    """
-    numTratamientos = actual_design.shape[0] # Numero de tratamientos
+    print (tratamientos)
+
+    numTratamientos = tratamientos.shape[0] # Numero de tratamientos
+    # print(tratamientos[0,0])
+    # print(numTratamientos)
 
     random.seed() # Semilla para la aleatorizacion para las pruebas
     total_tests = np.arange(1,numTratamientos*numReplicasPorTratamiento + 1) # Lista ordenada de acuerdo al
                                                                              # numero total de replicas
     random.shuffle(total_tests) # Barajando la lista para aleatorizar el orden de las pruebas
-
-
     matrixReplicas = total_tests.reshape(numTratamientos,numReplicasPorTratamiento) # Generando la matrix a partir de la lista
-    """
+    # print(matrixReplicas)
+
     print
     print    
     print("****************** Matrix con el orden de experimentacion ******************")
     print(matrixReplicas)
-    """
-    rep = 1
-    #ordenExperimentos = []
+
+
     ordenTratamientos = []
-    for i in range(1,numReplicasPorTratamiento*numTratamientos + 1):
+    for rep in range(1,numReplicasPorTratamiento*numTratamientos + 1):
         index = np.where(matrixReplicas==rep)
         rep += 1
-        E = actual_design.loc[int(index[0])]
-        # print E.values
-        ordenTratamientos.append(E.values)
-    """
+        # print(index)
+        # print(tratamientos[index[0]][0])
+        E = tratamientos[index[0]][0]
+        ordenTratamientos.append([E[0],E[1]])
+
     print(ordenTratamientos)
     print
     print
     print("****************** Orden de ejecucion de las simulaciones ******************")
-    """
-    experimento = {
-        "ryu-ataque": {"ping": 0, "iperf":0},
-        "ryu-normal": {"ping": 0, "iperf":0},
-        "pox-ataque": {"ping": 0, "iperf":0},
-        "pox-normal": {"ping": 0, "iperf":0},
-    }
+    for e in ordenTratamientos:
+        print e
+        
 
+
+    
+
+    
+
+
+    
     filenames = []
     nameFile = ''
     i = 0
+    """
 
     for t in ordenTratamientos:
         i += 1
@@ -217,9 +223,9 @@ def experimentos():
                         experimento["pox-normal"]["ping"] += 1
                         nameFile += "-" + str(experimento["pox-normal"]["ping"]) + ".log"
             filenames.append(nameFile)
+    
 
-
-
+    """
     return filenames
 
 def imprimirArchivosLogGenerados(listaF, num_ren = 4):
@@ -239,6 +245,7 @@ if __name__ == "__main__":
     files_log = experimentos()
     imprimirArchivosLogGenerados(files_log)
     # files_log = ["pox-ataque-iperf-1.log", "pox-ataque-iperf-2.log"]
+    """
 
     for fl_name in files_log:
         print (fl_name + "\n")
@@ -331,6 +338,7 @@ if __name__ == "__main__":
             sleep(1)
         print()
         info("\n******* Pasando al siguiente experimento *******\n\n")
+    """
     print ("FIN EXPERIMENTOS")
 
 
