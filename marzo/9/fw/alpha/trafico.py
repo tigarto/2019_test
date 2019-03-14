@@ -252,7 +252,7 @@ def test_ping_normal(ue,nombreArchivo):
     # Arrancando la red
     net.start()
     net.pingAll()
-    t_normal.pingMeasure() # Mostrando salida en pantalla
+    # t_normal.pingMeasure() # Mostrando salida en pantalla
     t_normal.pingMeasure(filename = nombreArchivo) # Llevando salida a un archivo
     CLI(net)
     net.stop()
@@ -276,7 +276,7 @@ def test_ping_ataque(ue,nombreArchivo):
     # Arrancando la red
     net.start()
     net.pingAll()
-    t_ataque.pingMeasure() # Mostrando salida en pantalla
+    # t_ataque.pingMeasure() # Mostrando salida en pantalla
     t_ataque.pingMeasure(filename = nombreArchivo) # Llevando salida a un archivo
     CLI(net)
     net.stop()
