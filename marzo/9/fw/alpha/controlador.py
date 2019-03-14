@@ -11,6 +11,7 @@ from mininet.cli import CLI
 from subprocess import Popen, PIPE, STDOUT
 from select import poll, POLLIN
 from os import environ
+from mininet.topolib import TreeTopo 
 
 class RYU( Controller ):
 
@@ -83,3 +84,26 @@ class POX( Controller ):
                              command=command,
                              cargs=cargs, **kwargs )
 
+"""
+Codigo test
+"""
+
+def testPOX():
+    net = Mininet( topo=TreeTopo( depth=2, fanout=2 ),
+                   controller=POX('c0') )                  
+    net.start()
+    net.pingAll()
+    CLI( net )
+    net.stop()
+
+def testRYU():
+    net = Mininet( topo=TreeTopo( depth=2, fanout=2 ),
+                   controller=RYU('c0') )               
+    net.start()
+    net.pingAll()
+    CLI( net )
+    net.stop()
+
+if __name__ == "__main__":
+    # testPOX()
+    testRYU()
