@@ -113,7 +113,7 @@ def experimentos():
     # Parametros del experimento
     numFactores = 2
     numNiveles = 2
-    numReplicasPorTratamiento = 2
+    numReplicasPorTratamiento = 30
 
     # Generando los tratamientos
     tratamientos = dexpy.factorial.build_factorial(numFactores, numFactores**numNiveles)
@@ -255,13 +255,15 @@ if __name__ == "__main__":
                     # RYU-NORMAL-IPERF
                     ryu_normal.startTest()
                     sleep(10)
-                    ryu_normal.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
+                    # ryu_normal.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
+                    ryu_normal.trafico.iperfMeasure(filename=fl_name, tiempo = 30)
                     ryu_normal.endTest()
                 else:
                     # RYU-NORMAL-PING
                     ryu_normal.startTest()
                     sleep(10)
-                    ryu_normal.trafico.pingMeasure(filename=fl_name, veces = 20)
+                    # ryu_normal.trafico.pingMeasure(filename=fl_name, veces = 20)
+                    ryu_normal.trafico.pingMeasure(filename=fl_name, veces = 30)
                     ryu_normal.endTest()
                 ryu_normal.killTest()
                 ryu_normal.killController()
@@ -273,13 +275,15 @@ if __name__ == "__main__":
                     # RYU-NORMAL-IPERF
                     ryu_ataque.startTest()
                     sleep(10)
-                    ryu_ataque.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
+                    # ryu_ataque.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
+                    ryu_ataque.trafico.iperfMeasure(filename=fl_name, tiempo = 30)
                     ryu_ataque.endTest()
                 else:
                     # RYU-NORMAL-PING
                     ryu_ataque.startTest()
                     sleep(10)
-                    ryu_ataque.trafico.pingMeasure(filename=fl_name, veces = 20)
+                    # ryu_ataque.trafico.pingMeasure(filename=fl_name, veces = 20)
+                    ryu_ataque.trafico.pingMeasure(filename=fl_name, veces = 30)
                     ryu_ataque.endTest()
                 ryu_ataque.killTest()
                 ryu_ataque.killController()
@@ -295,13 +299,15 @@ if __name__ == "__main__":
                     # POX-NORMAL-IPERF
                     pox_normal.startTest()
                     sleep(10)
-                    pox_normal.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
+                    # pox_normal.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
+                    pox_normal.trafico.iperfMeasure(filename=fl_name, tiempo = 30)
                     pox_normal.endTest()
                 else:
                     # POX-NORMAL-PING
                     pox_normal.startTest()
                     sleep(10)
-                    pox_normal.trafico.pingMeasure(filename=fl_name, veces = 20)
+                    # pox_normal.trafico.pingMeasure(filename=fl_name, veces = 20)
+                    pox_normal.trafico.pingMeasure(filename=fl_name, veces = 30)
                     pox_normal.endTest()
                 pox_normal.killTest()
                 pox_normal.killController()
@@ -314,13 +320,15 @@ if __name__ == "__main__":
                     # RYU-NORMAL-IPERF
                     pox_ataque.startTest()
                     sleep(10)
-                    pox_ataque.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
+                    # pox_ataque.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
+                    pox_ataque.trafico.iperfMeasure(filename=fl_name, tiempo = 30)
                     pox_ataque.endTest()
                 else:                    
                     # RYU-NORMAL-PING
                     pox_ataque.startTest()
                     sleep(10)
-                    pox_ataque.trafico.pingMeasure(filename=fl_name, veces = 20)
+                    # pox_ataque.trafico.pingMeasure(filename=fl_name, veces = 20)
+                    pox_ataque.trafico.pingMeasure(filename=fl_name, veces = 30)
                     pox_ataque.endTest()
                 pox_ataque.killTest()
                 pox_ataque.killController()            
