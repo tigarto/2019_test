@@ -86,31 +86,34 @@ c0
 *** Starting 1 switches
 s1 ...
 *** Ping: testing ping reachability
-h1 -> X h3 
+h1 -> h2 h3 
 h2 -> h1 h3 
 h3 -> h1 h2 
-*** Results: 16% dropped (5/6 received)
-Starting Pings: 10.0.0.2 ---> 10.0.0.3
+*** Results: 0% dropped (6/6 received)
+Launch attack: 10.0.0.1 ---> 10.0.0.3
+Starting pings ***
 *** h2 : ('ping -c', 10, '-i', 1.0, '10.0.0.3')
 PING 10.0.0.3 (10.0.0.3) 56(84) bytes of data.
-64 bytes from 10.0.0.3: icmp_seq=1 ttl=64 time=0.021 ms
-64 bytes from 10.0.0.3: icmp_seq=2 ttl=64 time=0.074 ms
-64 bytes from 10.0.0.3: icmp_seq=3 ttl=64 time=0.135 ms
-64 bytes from 10.0.0.3: icmp_seq=4 ttl=64 time=0.064 ms
-64 bytes from 10.0.0.3: icmp_seq=5 ttl=64 time=0.046 ms
-64 bytes from 10.0.0.3: icmp_seq=6 ttl=64 time=0.077 ms
-64 bytes from 10.0.0.3: icmp_seq=7 ttl=64 time=0.170 ms
-64 bytes from 10.0.0.3: icmp_seq=8 ttl=64 time=0.067 ms
-64 bytes from 10.0.0.3: icmp_seq=9 ttl=64 time=0.060 ms
-64 bytes from 10.0.0.3: icmp_seq=10 ttl=64 time=0.080 ms
+64 bytes from 10.0.0.3: icmp_seq=1 ttl=64 time=0.041 ms
+64 bytes from 10.0.0.3: icmp_seq=2 ttl=64 time=0.030 ms
+64 bytes from 10.0.0.3: icmp_seq=3 ttl=64 time=0.021 ms
+64 bytes from 10.0.0.3: icmp_seq=4 ttl=64 time=0.021 ms
+64 bytes from 10.0.0.3: icmp_seq=5 ttl=64 time=0.023 ms
+64 bytes from 10.0.0.3: icmp_seq=6 ttl=64 time=0.022 ms
+64 bytes from 10.0.0.3: icmp_seq=7 ttl=64 time=0.022 ms
+64 bytes from 10.0.0.3: icmp_seq=8 ttl=64 time=0.021 ms
+64 bytes from 10.0.0.3: icmp_seq=9 ttl=64 time=0.020 ms
+64 bytes from 10.0.0.3: icmp_seq=10 ttl=64 time=0.029 ms
 
 --- 10.0.0.3 ping statistics ---
-10 packets transmitted, 10 received, 0% packet loss, time 9194ms
-rtt min/avg/max/mdev = 0.021/0.079/0.170/0.041 ms
+10 packets transmitted, 10 received, 0% packet loss, time 9222ms
+rtt min/avg/max/mdev = 0.020/0.025/0.041/0.006 ms
 End pings ***
-Starting Pings: 10.0.0.2 ---> 10.0.0.3
-Open file: ping_ataque_ryu.log
+End attack ***
+Launch attack: 10.0.0.1 ---> 10.0.0.3
+Starting pings ***
 End pings ***
+End attack ***
 *** Starting CLI:
 containernet> 
 ```
@@ -119,28 +122,59 @@ containernet>
 
 ```
 PING 10.0.0.3 (10.0.0.3) 56(84) bytes of data.
-64 bytes from 10.0.0.3: icmp_seq=1 ttl=64 time=0.065 ms
-64 bytes from 10.0.0.3: icmp_seq=2 ttl=64 time=0.070 ms
-64 bytes from 10.0.0.3: icmp_seq=3 ttl=64 time=0.083 ms
-64 bytes from 10.0.0.3: icmp_seq=4 ttl=64 time=0.083 ms
-64 bytes from 10.0.0.3: icmp_seq=5 ttl=64 time=0.080 ms
-64 bytes from 10.0.0.3: icmp_seq=6 ttl=64 time=0.083 ms
-64 bytes from 10.0.0.3: icmp_seq=7 ttl=64 time=0.064 ms
-64 bytes from 10.0.0.3: icmp_seq=8 ttl=64 time=0.073 ms
-64 bytes from 10.0.0.3: icmp_seq=9 ttl=64 time=0.076 ms
-64 bytes from 10.0.0.3: icmp_seq=10 ttl=64 time=0.045 ms
+64 bytes from 10.0.0.3: icmp_seq=1 ttl=64 time=0.038 ms
+64 bytes from 10.0.0.3: icmp_seq=2 ttl=64 time=0.016 ms
+64 bytes from 10.0.0.3: icmp_seq=3 ttl=64 time=0.023 ms
+64 bytes from 10.0.0.3: icmp_seq=4 ttl=64 time=0.019 ms
+64 bytes from 10.0.0.3: icmp_seq=5 ttl=64 time=0.019 ms
+64 bytes from 10.0.0.3: icmp_seq=6 ttl=64 time=0.022 ms
+64 bytes from 10.0.0.3: icmp_seq=7 ttl=64 time=0.026 ms
+64 bytes from 10.0.0.3: icmp_seq=8 ttl=64 time=0.020 ms
+64 bytes from 10.0.0.3: icmp_seq=9 ttl=64 time=0.027 ms
+64 bytes from 10.0.0.3: icmp_seq=10 ttl=64 time=0.023 ms
 
 --- 10.0.0.3 ping statistics ---
-10 packets transmitted, 10 received, 0% packet loss, time 9207ms
-rtt min/avg/max/mdev = 0.045/0.072/0.083/0.012 ms
+10 packets transmitted, 10 received, 0% packet loss, time 9210ms
+rtt min/avg/max/mdev = 0.016/0.023/0.038/0.006 ms
 ```
 
 **Conclusion**:
-1. Los resultados son muy parecidos incluso a los del caso normal. ¿Se estara lanzando el ataque?
-2. No esta mostrandose la salida ```End attack``` en el bash. Propia del siguiente fragmento de código:
+1. La comparación entre el caso normal y el con ataque si tiene sentido para la salida:
+   
+   **Salida en consola**
 
-    ```python
-    ...
-    process_attack.kill()
-    info("End attack ***\n")
+   * **Caso normal**: 
+   
     ```
+    --- 10.0.0.3 ping statistics ---
+    10 packets transmitted, 10 received, 0% packet loss, time 9208ms
+    rtt min/avg/max/mdev = 0.041/0.073/0.106/0.019 ms
+    ```
+
+   * **Caso ataque**: 
+  
+    ```
+    --- 10.0.0.3 ping statistics ---
+    10 packets transmitted, 10 received, 0% packet loss, time 9210ms
+    rtt min/avg/max/mdev = 0.016/0.023/0.038/0.006 ms
+    ```
+
+    **Salida en archivo**
+
+    * **Caso normal**: 
+   
+    ```
+    --- 10.0.0.3 ping statistics ---
+    10 packets transmitted, 10 received, 0% packet loss, time 9208ms
+    rtt min/avg/max/mdev = 0.041/0.073/0.106/0.019 ms
+    ```
+
+   * **Caso ataque**: 
+  
+    ```
+    --- 10.0.0.3 ping statistics ---
+    10 packets transmitted, 10 received, 0% packet loss, time 9210ms
+    rtt min/avg/max/mdev = 0.016/0.023/0.038/0.006 ms
+    ```
+
+2. Los resultados son muy parecidos incluso a los del caso normal. ¿Se estara lanzando el ataque?
