@@ -86,7 +86,7 @@ https://github.com/tigarto/2019_test/blob/master/febrero/09/datos_experimentos/e
 if __name__ == "__main__":
     # Ensayo conversion
 
-    baseDir = './resultados1/'
+    baseDir = './resultados8/resultados_ryu/'
     files = os.listdir(baseDir)
     print(files)
     tratamientos = {
