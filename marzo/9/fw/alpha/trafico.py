@@ -123,42 +123,47 @@ class TraficoAtaque(Trafico):
                     h_atk = None,
                     h_src = None,
                     h_dst = None,
-                    veces=4,
-                    intervalo=1,
-                    filename=None):
+                    veces = 10,
+                    intervalo = 1.0,
+                    filename = None):
         h_C = h_src
         h_V = h_dst
         h_A = h_atk
-        tiempo_start = 3
         if h_src == None and h_dst == None and h_atk == None:
             h_C = self.src
             h_V = self.dst
             h_A = self.atk
             if self.tipo_ataque == 1:
                 if filename == None:
+                    # Caso en el cual no se redirecciona a un archivo
                     info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
+                    # Proceso hijo que lanza el araque
                     process_attack = h_A.popen(['hping3', '--flood',
                                                 '--rand-source',
                                                 h_V.IP()])
                     if (process_attack != 0):
-                        # sleep(tiempo_start)
+                        # Codigo del padre
                         info("Starting pings ***\n")
                         h_C.cmdPrint('ping -c', veces, '-i', intervalo, str(h_V.IP()))
                         info("End pings ***\n")
                         process_attack.kill()
+                        info("End attack ***\n")
                 else:
+                    # Caso en el que se redirecciona la salida del ping a un archivo
                     info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
+                    # Proceso hijo que lanza el araque
                     process_attack = h_A.popen(['hping3', '--flood',
                                                 '--rand-source',
                                                 h_V.IP()])
                     if (process_attack != 0):
-                        # sleep(tiempo_start)
+                        # Codigo del padre
                         info("Starting pings ***\n")
                         h_C.cmd('ping -c', veces, '-i', intervalo, str(h_V.IP()),'>',filename)
                         info("End pings ***\n")
-                        #process_attack.kill()
-                        #h_V.cmd('kill %iperf')
+                        process_attack.kill()
+                        info("End attack ***\n")
     
+    """
     def iperfMeasure(self,
                      h_atk=None,
                      h_src = None,
@@ -219,7 +224,7 @@ class TraficoAtaque(Trafico):
         print("+++++++++++++++++++++ End iperf thread +++++++++++++++++++++\n\n")
         self.timer.cancel()
 
-        
+    """ 
 
 ue1 = UnidadExperimental(topo=SingleSwitchTopo(k = 3, bw = 100),controller=RYU('c0'))
 ue1.definirNodosClaves('h1','h2','h3')
@@ -229,7 +234,7 @@ ue2.definirNodosClaves('h1','h2','h3')
 
 
 
-def test_ping(ue,nombreArchivo):
+def test_ping_normal(ue,nombreArchivo):
     # Parametros de la unidad experimental
     setLogLevel("info")
     info("Configurando unidad experimental\n")
@@ -243,18 +248,45 @@ def test_ping(ue,nombreArchivo):
     # ---- info("%s %s %s\n"%(A,C,V))
     C = net.get(C)
     V = net.get(V)
-    t_normal_ryu = TraficoNormal(C,V)
+    t_normal = TraficoNormal(C,V)
     # Arrancando la red
     net.start()
     net.pingAll()
-    t_normal_ryu.pingMeasure() # Mostrando salida en pantalla
-    t_normal_ryu.pingMeasure(filename = nombreArchivo) # Llevando salida a un archivo
+    t_normal.pingMeasure() # Mostrando salida en pantalla
+    t_normal.pingMeasure(filename = nombreArchivo) # Llevando salida a un archivo
     CLI(net)
     net.stop()
 
+
+def test_ping_ataque(ue,nombreArchivo):
+    # Parametros de la unidad experimental
+    setLogLevel("info")
+    info("Configurando unidad experimental\n")
+    info("Configurando trafico normal\n")
+    info("Configurando la red\n")
+    net = Mininet(topo = ue.getTopo(),controller=ue.getController(),build=False)
+    net.build()
+    # Configurando clase asociada al trafico
+    info("Configurando clase asociada al trafico\n")    
+    [A,C,V] = ue.obtenerNodosClaves()
+    A = net.get(A)
+    C = net.get(C)
+    V = net.get(V)
+    t_ataque = TraficoAtaque(A,C,V)
+    # Arrancando la red
+    net.start()
+    net.pingAll()
+    t_ataque.pingMeasure() # Mostrando salida en pantalla
+    t_ataque.pingMeasure(filename = nombreArchivo) # Llevando salida a un archivo
+    CLI(net)
+    net.stop()
+
+
 if __name__ == "__main__":
-    # test_ping(ue1,'ping_normal_ryu.log')
-    test_ping(ue2,'ping_normal_pox.log')
+    # test_ping_normal(ue1,'ping_normal_ryu.log')
+    # test_ping_normal(ue2,'ping_normal_pox.log')
+    # test_ping_ataque(ue1,'ping_ataque_ryu.log')
+    test_ping_ataque(ue2,'ping_ataque_pox.log')
     
 
 
