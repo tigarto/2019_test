@@ -3,7 +3,7 @@ from mininet.net import Mininet
 from mininet.log import info, setLogLevel
 from mininet.node import OVSSwitch, Controller, RemoteController
 from mininet.link import TCLink
-from mininet.topo import Topo
+from mininet.topo import Topo, SingleSwitchTopo
 import subprocess
 from time import time, sleep
 import psutil
@@ -11,6 +11,7 @@ from mininet.cli import CLI
 from subprocess import Popen, PIPE, STDOUT
 from select import poll, POLLIN
 from controlador import RYU, POX
+from mininet.topolib import TreeTopo 
 
 class UnidadExperimental:
 
@@ -179,3 +180,38 @@ class UnidadExperimental:
         No hay manejo de errores
         """
         return [self.atacante, self.cliente, self.victima]
+
+def test_ue1():
+    # Parametros de la unidad experimental
+    setLogLevel("info")
+    info("Configurando unidad experimental\n")
+    c_ryu = RYU('c0')
+    topo_tree = TreeTopo( depth=2, fanout=2 )
+    ue1 = UnidadExperimental(topo=topo_tree,controller=c_ryu)
+    ue1.definirNodosClaves('h1','h2','h3')
+    # Iniciando mininet a partir de la unidad experimental
+    info("Configurando e inicializando la red\n")
+    net = Mininet( topo=ue1.getTopo(), controller=ue1.getController())
+    net.start()
+    net.pingAll()
+    CLI( net )
+    net.stop()
+
+def test_ue2():
+    # Parametros de la unidad experimental
+    setLogLevel("info")
+    info("Configurando unidad experimental\n")
+    ue2 = UnidadExperimental(topo=SingleSwitchTopo(k = 4),controller=POX('c0'))
+    ue2.definirNodosClaves('h1','h2','h3')
+    # Iniciando mininet a partir de la unidad experimental
+    info("Configurando e inicializando la red\n")
+    net = Mininet( topo=ue2.getTopo(), controller=ue2.getController())
+    net.start()
+    net.pingAll()
+    CLI( net )
+    net.stop()
+
+
+if __name__ == "__main__":
+    # test_ue1()
+    test_ue2()
