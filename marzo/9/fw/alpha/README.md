@@ -179,6 +179,135 @@ c0
 containernet> 
 ```
 
+### Trafico ###
+
+El codigo python asociado al trafico es [trafico.py](trafico.py). 
+
+
+A continuación se encuentra un fragmento con un ejemplo de uso:
+
+```python
+# Parametros de la unidad experimental
+setLogLevel("info")
+info("Configurando unidad experimental\n")
+# 1. Definiendo la unidadexperimental
+ue = UnidadExperimental(TreeTopo( depth=2, fanout=2 ),controller=RYU('c0'))
+ue.definirNodosClaves('h1','h2','h3')
+info("Configurando la red\n")
+# 2. Configurando la red mininet a partir de la unidad experimental
+net = Mininet(topo = ue.getTopo(),controller=ue.getController(),build=False)
+net.build()
+info("Configurando trafico normal\n")
+[A,C,V] = ue.obtenerNodosClaves()
+C = net.get(C)
+V = net.get(V)
+# 3. Configurando clase asociada al trafico   
+t_normal = TraficoNormal(C,V)
+info("Iniciando la red\n")
+net.start()
+info("Realizando pruebas en la red\n")
+# 4. Llevando a cabo pruebas   
+net.pingAllFull()
+t_normal.pingMeasure() # Mostrando salida en pantalla
+t_normal.pingMeasure(filename = 'ping_normal.log') # Llevando salida a un archivo
+CLI(net)
+info("Deteniendo la red red\n")
+net.stop()
+```
+
+La salida en consola fue algo como lo siguiente:
+
+```bash
+# Comando python
+sudo python trafico.py 
+
+# Iniciando mininet
+Configurando unidad experimental
+Configurando la red
+*** Creating network
+*** Adding controller
+*** Adding hosts:
+h1 h2 h3 h4 
+*** Adding switches:
+s1 s2 s3 
+*** Adding links:
+(s1, s2) (s1, s3) (s2, h1) (s2, h2) (s3, h3) (s3, h4) 
+*** Configuring hosts
+h1 h2 h3 h4 
+Configurando trafico normal
+Iniciando la red
+*** Starting controller
+c0 
+*** Starting 3 switches
+s1 s2 s3 ...
+Realizando pruebas en la red
+*** Ping: testing ping reachability
+h1 -> h2 h3 h4 
+h2 -> h1 h3 h4 
+h3 -> h1 h2 h4 
+h4 -> h1 h2 h3 
+*** Results: 
+ h1->h2: 1/1, rtt min/avg/max/mdev 2066.568/2066.568/2066.568/0.000 ms
+ h1->h3: 1/1, rtt min/avg/max/mdev 9.961/9.961/9.961/0.000 ms
+ h1->h4: 1/1, rtt min/avg/max/mdev 8.937/8.937/8.937/0.000 ms
+ h2->h1: 1/1, rtt min/avg/max/mdev 0.097/0.097/0.097/0.000 ms
+ h2->h3: 1/1, rtt min/avg/max/mdev 12.130/12.130/12.130/0.000 ms
+ h2->h4: 1/1, rtt min/avg/max/mdev 9.072/9.072/9.072/0.000 ms
+ h3->h1: 1/1, rtt min/avg/max/mdev 0.165/0.165/0.165/0.000 ms
+ h3->h2: 1/1, rtt min/avg/max/mdev 0.070/0.070/0.070/0.000 ms
+ h3->h4: 1/1, rtt min/avg/max/mdev 4.281/4.281/4.281/0.000 ms
+ h4->h1: 1/1, rtt min/avg/max/mdev 0.117/0.117/0.117/0.000 ms
+ h4->h2: 1/1, rtt min/avg/max/mdev 0.035/0.035/0.035/0.000 ms
+ h4->h3: 1/1, rtt min/avg/max/mdev 0.021/0.021/0.021/0.000 ms
+Starting Pings: 10.0.0.2 ---> 10.0.0.3
+*** h2 : ('ping -c', 10, '-i', 1.0, '10.0.0.3')
+PING 10.0.0.3 (10.0.0.3) 56(84) bytes of data.
+64 bytes from 10.0.0.3: icmp_seq=1 ttl=64 time=0.039 ms
+64 bytes from 10.0.0.3: icmp_seq=2 ttl=64 time=0.063 ms
+64 bytes from 10.0.0.3: icmp_seq=3 ttl=64 time=0.071 ms
+64 bytes from 10.0.0.3: icmp_seq=4 ttl=64 time=0.063 ms
+64 bytes from 10.0.0.3: icmp_seq=5 ttl=64 time=0.061 ms
+64 bytes from 10.0.0.3: icmp_seq=6 ttl=64 time=0.107 ms
+64 bytes from 10.0.0.3: icmp_seq=7 ttl=64 time=0.107 ms
+64 bytes from 10.0.0.3: icmp_seq=8 ttl=64 time=0.106 ms
+64 bytes from 10.0.0.3: icmp_seq=9 ttl=64 time=0.087 ms
+64 bytes from 10.0.0.3: icmp_seq=10 ttl=64 time=0.096 ms
+
+--- 10.0.0.3 ping statistics ---
+10 packets transmitted, 10 received, 0% packet loss, time 9203ms
+rtt min/avg/max/mdev = 0.039/0.080/0.107/0.022 ms
+End pings ***
+Starting Pings: 10.0.0.2 ---> 10.0.0.3
+Open file: ping_normal.log
+End pings ***
+*** Starting CLI:
+containernet> 
+```
+
+El archivo resultante se muestra a continuación:
+
+```
+PING 10.0.0.3 (10.0.0.3) 56(84) bytes of data.
+64 bytes from 10.0.0.3: icmp_seq=1 ttl=64 time=0.036 ms
+64 bytes from 10.0.0.3: icmp_seq=2 ttl=64 time=0.077 ms
+64 bytes from 10.0.0.3: icmp_seq=3 ttl=64 time=0.044 ms
+64 bytes from 10.0.0.3: icmp_seq=4 ttl=64 time=0.074 ms
+64 bytes from 10.0.0.3: icmp_seq=5 ttl=64 time=0.106 ms
+64 bytes from 10.0.0.3: icmp_seq=6 ttl=64 time=0.084 ms
+64 bytes from 10.0.0.3: icmp_seq=7 ttl=64 time=0.078 ms
+64 bytes from 10.0.0.3: icmp_seq=8 ttl=64 time=0.092 ms
+64 bytes from 10.0.0.3: icmp_seq=9 ttl=64 time=0.071 ms
+64 bytes from 10.0.0.3: icmp_seq=10 ttl=64 time=0.065 ms
+
+--- 10.0.0.3 ping statistics ---
+10 packets transmitted, 10 received, 0% packet loss, time 9194ms
+rtt min/avg/max/mdev = 0.036/0.072/0.106/0.022 ms
+```
+
+Lo que se midió anteiormente fue el ping.
+
+
+
 
 ```python
 # ping
