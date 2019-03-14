@@ -158,7 +158,7 @@ class TraficoAtaque(Trafico):
                         info("End pings ***\n")
                         #process_attack.kill()
                         #h_V.cmd('kill %iperf')
-    """
+    
     def iperfMeasure(self,
                      h_atk=None,
                      h_src = None,
@@ -218,7 +218,7 @@ class TraficoAtaque(Trafico):
         self.src.cmdPrint('kill %iperf')
         print("+++++++++++++++++++++ End iperf thread +++++++++++++++++++++\n\n")
         self.timer.cancel()
-    """
+
         
 
 ue1 = UnidadExperimental(TreeTopo( depth=2, fanout=2 ),controller=RYU('c0'))
@@ -256,7 +256,33 @@ def test_ping(ue):
 
 if __name__ == "__main__":
     # test_ping(ue1)
-    test_ping(ue2)
+    # test_ping(ue2)
+    # Parametros de la unidad experimental
+    setLogLevel("info")
+    info("Configurando unidad experimental\n")
+    # 1. Definiendo la unidadexperimental
+    ue = UnidadExperimental(TreeTopo( depth=2, fanout=2 ),controller=RYU('c0'))
+    ue.definirNodosClaves('h1','h2','h3')
+    info("Configurando la red\n")
+    # 2. Configurando la red mininet a partir de la unidad experimental
+    net = Mininet(topo = ue.getTopo(),controller=ue.getController(),build=False)
+    net.build()
+    info("Configurando trafico normal\n")
+    [A,C,V] = ue.obtenerNodosClaves()
+    C = net.get(C)
+    V = net.get(V)
+    # 3. Configurando clase asociada al trafico   
+    t_normal = TraficoNormal(C,V)
+    info("Iniciando la red\n")
+    net.start()
+    info("Realizando pruebas en la red\n")
+    # 4. Llevando a cabo pruebas   
+    net.pingAllFull()
+    t_normal.pingMeasure() # Mostrando salida en pantalla
+    t_normal.pingMeasure(filename = 'ping_normal.log') # Llevando salida a un archivo
+    CLI(net)
+    info("Deteniendo la red red\n")
+    net.stop()
 
 
 
