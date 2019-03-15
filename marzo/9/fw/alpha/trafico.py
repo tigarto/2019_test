@@ -15,6 +15,8 @@ import signal
 from mininet.topolib import TreeTopo 
 from controlador import RYU, POX
 from unidadExperimental import UnidadExperimental
+from mininet.link import TCLink
+
 
 TIEMPO_ADICIONAL = 4
 
@@ -64,6 +66,50 @@ class TraficoNormal(Trafico):
             ping_process.wait()
             logfile.close()
             info("End pings ***\n")
+    
+    def iperfMeasure(self,
+                     h_src = None,
+                     h_dst = None,
+                     intervalo=1,
+                     tiempo=10,
+                     filename=None
+                     ):
+        h_C = h_src
+        h_V = h_dst
+        if h_src == None and h_dst == None:
+            h_C = self.src
+            h_V = self.dst
+        if filename == None:
+            # Cuando hay nombre de archivo
+            info("Starting iperf server in %s\n"%(str(h_V.IP()))) 
+            # Proceso hijo
+            iperf_server_process = h_V.popen(['iperf', '-s'])
+            if iperf_server_process != 0:
+                # Proceso padre
+                info("Starting iperf client in %s\n"%(str(h_C.IP())))
+                h_C.cmdPrint('iperf', '-c', h_V.IP(), '-i', intervalo, '-t ', tiempo)
+                iperf_server_process.kill()
+                info("End iperf measure ***\n")
+        else:
+            info("Starting iperf server in %s\n"%(str(h_V.IP()))) 
+            # Proceso hijo
+            iperf_server_process = h_V.popen(['iperf', '-s'])
+            if iperf_server_process != 0:
+                info("Starting iperf client in %s\n"%(str(h_C.IP())))
+                info("Open file: %s\n"%filename)
+                h_C.cmd('iperf', '-c', h_V.IP(), '-i', intervalo, '-t ', tiempo, '>', filename)
+                iperf_server_process.kill()                
+                info("End iperf measure ***\n")
+                
+
+
+
+
+
+            
+        
+
+
     """
     def iperfMeasure(self,
                      h_src = None,
@@ -162,6 +208,63 @@ class TraficoAtaque(Trafico):
                         info("End pings ***\n")
                         process_attack.kill()
                         info("End attack ***\n")
+
+    def iperfMeasure(self,
+                     h_atk = None,
+                     h_src = None,
+                     h_dst = None,
+                     intervalo = 1,
+                     tiempo = 10,
+                     filename = None
+                     ):
+        h_C = h_src
+        h_V = h_dst
+        h_A = h_atk
+        if h_src == None and h_dst == None and h_atk == None:
+            h_C = self.src
+            h_V = self.dst
+            h_A = self.atk
+            if self.tipo_ataque == 1:
+                info("++++++ Ataque DoS por flooding y spoofing +++++\n")
+                if filename == None:
+                    info("Starting iperf server\n")                    
+                    server_process = h_V.popen(['iperf', '-s'])
+                    if server_process != 0:
+                        info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
+                        attack_process = h_A.popen(['hping3', '--flood',
+                                                '--rand-source',
+                                                h_V.IP()])
+                        if attack_process != 0:
+                            info("Starting iperf client\n")
+                            h_C.cmdPrint('iperf', '-c', h_V.IP(), '-i', intervalo, '-t ', tiempo)
+                            attack_process.kill()
+                            server_process.kill()
+                            info("Starting iperf measure\n")
+                else:
+                    info("Starting iperf server\n")                    
+                    server_process = h_V.popen(['iperf', '-s'])
+                    server_process = h_V.popen(['iperf', '-s'])
+                    if server_process != 0:
+                        info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
+                        attack_process = h_A.popen(['hping3', '--flood',
+                                                '--rand-source',
+                                                h_V.IP()])
+                        if attack_process != 0:
+                            info("Starting iperf client\n")
+                            h_C.cmdPrint('iperf', '-c', h_V.IP(), '-i', intervalo, '-t ', tiempo, '>', filename)
+                            attack_process.kill()
+                            server_process.kill()
+                            info("Starting iperf measure\n")
+
+
+
+
+
+
+
+
+
+        
     
     """
     def iperfMeasure(self,
@@ -232,9 +335,32 @@ ue1.definirNodosClaves('h1','h2','h3')
 ue2 = UnidadExperimental(topo=SingleSwitchTopo(k = 3, bw = 100),controller=POX('c0'))
 ue2.definirNodosClaves('h1','h2','h3')
 
+class TopologiaTest(Topo):
+    def __init__(self, bw = 100):
+        # Initialize topology
+        Topo.__init__(self)
+        self.bw = bw
+        h1 = self.addHost('h1', ip='10.0.0.1')  # Cliente
+        h2 = self.addHost('h2', ip='10.0.0.2')  # Atacante
+        h3 = self.addHost('h3', ip='10.0.0.3')  # Victima
 
+        # Add switches
+        info('*** Adding switches\n')
+        s1 = self.addSwitch('s1', protocols='OpenFlow13')
 
-def test_ping_normal(ue,nombreArchivo):
+        # Add links
+        info('*** Creating links\n')
+        self.addLink(h1, s1, bw = self.bw)
+        self.addLink(h2, s1, bw = self.bw)
+        self.addLink(h3, s1, bw = self.bw)
+
+ue3 = UnidadExperimental(topo=TopologiaTest(100),controller=RYU('c0'))
+ue3.definirNodosClaves('h1','h2','h3')
+
+ue4 = UnidadExperimental(topo=TopologiaTest(100),controller=POX('c0'))
+ue4.definirNodosClaves('h1','h2','h3')
+
+def test_ping_normal(ue,nombreArchivo = None):
     # Parametros de la unidad experimental
     setLogLevel("info")
     info("Configurando unidad experimental\n")
@@ -257,8 +383,31 @@ def test_ping_normal(ue,nombreArchivo):
     CLI(net)
     net.stop()
 
+def test_iperf_normal(ue,nombreArchivo = None):
+    # Parametros de la unidad experimental
+    setLogLevel("info")
+    info("Configurando unidad experimental\n")
+    info("Configurando trafico normal\n")
+    info("Configurando la red\n")
+    net = Mininet(topo = ue.getTopo(), controller=ue.getController(), link=TCLink ,build=False)
+    net.build()
+    # Configurando clase asociada al trafico
+    info("Configurando clase asociada al trafico\n")    
+    [A,C,V] = ue.obtenerNodosClaves()
+    # ---- info("%s %s %s\n"%(A,C,V))
+    C = net.get(C)
+    V = net.get(V)
+    t_normal = TraficoNormal(C,V)
+    # Arrancando la red
+    net.start()
+    net.pingAll()
+    # t_normal.iperfMeasure() # Mostrando salida en pantalla
+    t_normal.iperfMeasure(filename = nombreArchivo) # Llevando salida a un archivo
+    CLI(net)
+    net.stop()
 
-def test_ping_ataque(ue,nombreArchivo):
+
+def test_ping_ataque(ue,nombreArchivo = None):
     # Parametros de la unidad experimental
     setLogLevel("info")
     info("Configurando unidad experimental\n")
@@ -281,12 +430,43 @@ def test_ping_ataque(ue,nombreArchivo):
     CLI(net)
     net.stop()
 
+def test_iperf_ataque(ue,nombreArchivo = None):
+    # Parametros de la unidad experimental
+    setLogLevel("info")
+    info("Configurando unidad experimental\n")
+    info("Configurando trafico normal\n")
+    info("Configurando la red\n")
+    net = Mininet(topo = ue.getTopo(), controller=ue.getController(), link=TCLink ,build=False)
+    net.build()
+    # Configurando clase asociada al trafico
+    info("Configurando clase asociada al trafico\n")    
+    [A,C,V] = ue.obtenerNodosClaves()
+    A = net.get(A)
+    C = net.get(C)
+    V = net.get(V)
+    t_ataque = TraficoAtaque(A,C,V)
+    # Arrancando la red
+    net.start()
+    net.pingAll()
+    t_ataque.iperfMeasure() # Mostrando salida en pantalla
+    t_ataque.iperfMeasure(filename = nombreArchivo) # Llevando salida a un archivo
+    CLI(net)
+    net.stop()
+
+    
 
 if __name__ == "__main__":
     # test_ping_normal(ue1,'ping_normal_ryu.log')
     # test_ping_normal(ue2,'ping_normal_pox.log')
     # test_ping_ataque(ue1,'ping_ataque_ryu.log')
-    test_ping_ataque(ue2,'ping_ataque_pox.log')
+    # test_ping_ataque(ue2,'ping_ataque_pox.log')
+    # test_iperf_normal(ue3,'iperf_normal_ryu.log')
+    # test_iperf_normal(ue4,'iperf_normal_pox.log')
+    # test_iperf_ataque(ue3,'iperf_ataque_ryu.log')
+    test_iperf_ataque(ue4,'iperf_ataque_pox.log')
+
+
+
     
 
 
