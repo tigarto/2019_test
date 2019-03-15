@@ -102,62 +102,6 @@ class TraficoNormal(Trafico):
                 info("End iperf measure ***\n")
                 
 
-
-
-
-
-            
-        
-
-
-    """
-    def iperfMeasure(self,
-                     h_src = None,
-                     h_dst = None,
-                     intervalo=1,
-                     tiempo=10,
-                     filename=None
-                     ):
-        h_C = h_src
-        h_V = h_dst
-        if h_src == None and h_dst == None:
-            h_C = self.src
-            h_V = self.dst
-        
-        if filename == None:
-            info("Starting iperf server\n")      
-            self.timer = threading.Timer(tiempo + TIEMPO_ADICIONAL, self.killIperfMeasure)
-            #self.timer.setName("iperf thread")
-            self.timer.start()
-            sleep(1)
-            h_V.cmdPrint('iperf', '-s', '&')            
-            h_C.cmdPrint('iperf', '-c', h_V.IP(), '-i', intervalo, '-t ', tiempo)
-            #h_V.cmdPrint('kill %iperf')
-            
-
-        else:
-            info("Starting iperf server")
-            self.timer = threading.Timer(tiempo + TIEMPO_ADICIONAL, self.killIperfMeasure)
-            self.timer.start()
-            sleep(1)
-            h_V.cmdPrint('iperf', '-s', '&')
-            #self.timer.setName("iperf thread")
-            h_C.cmd('iperf', '-c', h_V.IP(), '-i', intervalo, '-t ', tiempo, '>', filename)
-            #h_V.cmdPrint('kill %iperf')
-            print("*** End iperf measure ***\n")
-        #print("*** End iperf thread ***")
-        self.timer.join()
-        print("*** End iperf measure ***\n")
-
-    def killIperfMeasure(self):        
-        self.src.cmdPrint('kill %iperf')
-        self.dst.cmdPrint('kill %iperf')
-        print("******************************************************** End iperf thread ***")
-        self.timer.cancel()
-    """
-
-
-
 class TraficoAtaque(Trafico):
     def __init__(self, atk = None,src = None, dst = None, tipo_ataque = 1):
         Trafico.__init__(self, src = src, dst = dst)
@@ -217,6 +161,7 @@ class TraficoAtaque(Trafico):
                         tiempo = 10,
                         filename = None
                         ):
+            # Es obligatorio poner el nombre del archivo
             h_C = h_src
             h_V = h_dst
             h_A = h_atk
@@ -246,176 +191,28 @@ class TraficoAtaque(Trafico):
                                                                  args=[client_process,server_process,attack_process] )
                                     self.timer.start()
                                     self.timer.join()
-                                #attack_process.kill()
-                                #server_process.kill()
                                 info("Starting iperf measure\n")
+                    else:
+                        info("Es necesario colocar un nombre de archivo a la entrada para almacenar los resultados\n")
+                        # Nota: Mirar si con cmdPrint se puede obtener el pid para killearlo como en el caso de Popen
+                        # Puede que last pid sirva?
 
     def killIperfClient(self,p1,p2,p3):
-        info("----\n")
-        #self.src.cmdPrint('kill %iperf')
-        #pid_in.kill()
         p1.kill()
-        info("----\n")
         p2.kill()
         p3.kill()
-        #log.close()
-        #self.dst.cmdPrint('kill %iperf')
-        info("----\n")
-        #self.atk.cmdPrint('kill %hpin3')
-        
-        
-        #self.src.terminate()
-        #salida = self.src.cmd('ps|grep') 
-        info("----\n")
         self.timer.cancel()
-        info("----\n")    
+   
 
-    """
-
-    def iperfMeasure(self,
-                     h_atk = None,
-                     h_src = None,
-                     h_dst = None,
-                     intervalo = 1,
-                     tiempo = 10,
-                     filename = None
-                     ):
-        h_C = h_src
-        h_V = h_dst
-        h_A = h_atk
-        if h_src == None and h_dst == None and h_atk == None:
-            h_C = self.src
-            h_V = self.dst
-            h_A = self.atk
-            if self.tipo_ataque == 1:
-                info("++++++ Ataque DoS por flooding y spoofing +++++\n")
-                if filename == None:
-                    info("Starting iperf server\n")                    
-                    server_process = h_V.popen(['iperf', '-s'])
-                    if server_process != 0:
-                        info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
-                        attack_process = h_A.popen(['hping3', '--flood',
-                                                '--rand-source',
-                                                h_V.IP()])
-                        if attack_process != 0:
-                            info("Starting iperf client\n")
-                            client_process = h_C.popen(['iperf', '-c', str(h_V.IP()), '-i', str(intervalo), '-t ', str(tiempo)])
-                            if client_process != 0:
-                                # https://kite.com/python/docs/threading.Timer  
-                                # https://stackoverflow.com/questions/31039972/python-subprocess-popen-pid-return-the-pid-of-the-parent-script
-                                # https://gist.github.com/rhemz/fc682d0db8b97bcd13e1dd8b5dc5b5ab
-                                self.timer = threading.Timer(tiempo + TIEMPO_ADICIONAL, self.killIperfClient, args=[client_process] )
-                                self.timer.start()
-                                client_process.wait()
-                                # h_C.cmdPrint('iperf', '-c', h_V.IP(), '-i', intervalo, '-t ', tiempo)
-                                attack_process.kill()
-                                server_process.kill()
-                                #self.timer.cancel()
-                                info("End iperf measure\n")
-                else:
-                    info("Starting iperf server\n")                    
-                    server_process = h_V.popen(['iperf', '-s'])
-                    if server_process != 0:
-                        info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
-                        attack_process = h_A.popen(['hping3', '--flood',
-                                                '--rand-source',
-                                                h_V.IP()])
-                        if attack_process != 0:
-                            info("Starting iperf client\n")
-                            # Poner aca el timer
-                            self.timer = threading.Timer(tiempo + TIEMPO_ADICIONAL, self.killIperfClient)
-                            self.timer.start()
-                            h_C.cmdPrint('iperf', '-c', h_V.IP(), '-i', intervalo, '-t ', tiempo, '>', filename)
-                            info("++++\n")
-                            attack_process.kill()
-                            server_process.kill()
-                            self.timer.cancel()
-                            info("End iperf measure\n")
-
-    def killIperfClient(self,pid_client):
-        info("----\n")
-        pid_client.kill()
-        #self.src.sendCmd('kill %iperf')
-        #self.src.terminate()
-        #salida = self.src.cmd('ps|grep') 
-        info("----\n")
-        self.timer.cancel()
-        info("----\n")
-
-
+  
 
 
 # https://www.linode.com/docs/networking/diagnostics/install-iperf-to-diagnose-network-speed-in-linux/
 
 
 
+  
 
-
-
-        
-    
-
-    def iperfMeasure(self,
-                     h_atk=None,
-                     h_src = None,
-                     h_dst = None,
-                     intervalo=1,
-                     tiempo=10,
-                     filename=None
-                     ):
-        h_C = h_src
-        h_V = h_dst
-        h_A = h_atk
-        tiempo_start = 3
-        if h_src == None and h_dst == None and h_atk == None:
-            h_C = self.src
-            h_V = self.dst
-            h_A = self.atk
-        if self.tipo_ataque == 1:
-            info("********************************************************************************************\n")
-            if filename == None:
-                self.timer = threading.Timer(tiempo + TIEMPO_ADICIONAL, self.killIperfMeasure) 
-                self.timer.start()     
-                sleep(1) 
-                info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
-                process_attack = h_A.popen(['hping3', '--flood',
-                                            '--rand-source',
-                                            h_V.IP()])
-                if process_attack != 0:
-                    # sleep(tiempo_start)
-                    info("Starting iperf server\n")                    
-                    h_V.cmdPrint('iperf', '-s', '&')                    
-                    #self.timer.setName("iperf thread")                    
-                    h_C.cmdPrint('iperf', '-c', h_V.IP(), '-i', intervalo, '-t ', tiempo,'&')
-                    
-
-            else:
-                self.timer = threading.Timer(tiempo + TIEMPO_ADICIONAL, self.killIperfMeasure) 
-                self.timer.start()     
-                sleep(1) 
-                info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
-                process_attack = h_A.popen(['hping3', '--flood',
-                                            '--rand-source',
-                                            h_V.IP()])
-                
-                if process_attack != 0:
-                    # sleep(tiempo_start)
-                    info("Starting iperf server\n")                    
-                    h_V.cmdPrint('iperf', '-s', '&')
-                    #self.timer.setName("iperf thread")
-                    h_C.cmd('iperf', '-c', h_V.IP(), '-i', intervalo, '-t ', tiempo, '>', filename,'&')
-                    print("*** End iperf measure ***\n")
-            
-            self.timer.join()
-            print("*** End iperf measure ***\n")
-    
-    def killIperfMeasure(self):
-        self.dst.cmdPrint('kill %iperf')
-        self.src.cmdPrint('kill %iperf')
-        print("+++++++++++++++++++++ End iperf thread +++++++++++++++++++++\n\n")
-        self.timer.cancel()
-
-    """ 
 
 ue1 = UnidadExperimental(topo=SingleSwitchTopo(k = 3, bw = 100),controller=RYU('c0'))
 ue1.definirNodosClaves('h1','h2','h3')
@@ -541,6 +338,105 @@ def test_iperf_ataque(ue,nombreArchivo = None):
     net.stop()
 
     
+def test_iperf_mix_sin_timer(ue,nombreArchivo = None):
+    # Parametros de la unidad experimental
+    setLogLevel("info")
+    info("Configurando unidad experimental\n")
+    info("Configurando trafico normal\n")
+    info("Configurando la red\n")
+    net = Mininet(topo = ue.getTopo(), controller=ue.getController(), link=TCLink ,build=False)
+    net.build()
+    # Configurando clase asociada al trafico
+    info("Configurando clase asociada al trafico\n")    
+    [A,C,V] = ue.obtenerNodosClaves()
+    A = net.get(A)
+    C = net.get(C)
+    V = net.get(V)
+    #t_ataque = TraficoAtaque(A,C,V)
+    # Arrancando la red
+    net.start()
+    net.pingAll()
+    A.cmdPrint('hping3', '--flood','--rand-source',V.IP(),'&')
+    net.iperf(hosts = [C,V], seconds = 10)
+    A.cmdPrint("kill %hping3")
+    #t_ataque.iperfMeasure() # Mostrando salida en pantalla
+    #t_ataque.iperfMeasure(filename = nombreArchivo) # Llevando salida a un archivo
+    CLI(net)
+    net.stop()
+
+def test_iperf_mix_con_timer(ue,nombreArchivo = None, i = 1, t = 10):
+
+    def killAlarma(A,C,V):
+        info("Hola alarma\n")
+        C.cmdPrint("ps|grep iperf &")
+        A.cmdPrint("kill %hping3")
+        A.cmdPrint("ps")
+        V.cmdPrint("kill -9 %iperf &")
+        C.cmdPrint("kill -9 %iperf &")
+        info("Chao alarma\n")
+
+
+    def killAlarma2(p):
+        info("Hola alarma\n")
+        os.kill(p.pid, signal.SIGTERM)
+        info("Chao alarma\n")
+
+
+    def killAlarma3(p1,p2,p3):
+        info("Hola alarma\n")
+        os.kill(p1.pid, signal.SIGTERM)
+        os.kill(p2.pid, signal.SIGTERM)
+        os.kill(p3.pid, signal.SIGTERM)
+        info("Chao alarma\n")
+        
+
+    
+
+
+    # Parametros de la unidad experimental
+    # https://crashcourse.housegordon.org/python-subprocess.html
+    setLogLevel("info")
+    info("Configurando unidad experimental\n")
+    info("Configurando trafico normal\n")
+    info("Configurando la red\n")
+    net = Mininet(topo = ue.getTopo(), controller=ue.getController(), link=TCLink ,build=False)
+    net.build()
+    # Configurando clase asociada al trafico
+    info("Configurando clase asociada al trafico\n")    
+    [A,C,V] = ue.obtenerNodosClaves()
+    A = net.get(A)
+    C = net.get(C)
+    V = net.get(V)
+    #t_ataque = TraficoAtaque(A,C,V)
+    # Arrancando la red
+    net.start()
+    net.pingAll()
+    log = open(nombreArchivo,"w")
+    info("*** Iniciando el servidor iperf ***\n")
+    server_process = V.popen(['iperf','-s'])
+    if server_process != 0:
+        info("*** Lanzando el ataque ***\n")  
+        atack_process = A.popen(['hping3', '--flood','--rand-source',str(V.IP())])
+        if atack_process != 0:
+            info("*** Lanzando el cliente iperf ***\n")
+            client_process = C.popen(['iperf', '-c', str(V.IP()),'-i',str(i),
+                              '-t',str(t)],stdout=log, stderr=log, shell=True)
+            if client_process != 0:
+                #timer = threading.Timer(10, killAlarma, args=[A,C,V] )
+                #timer = threading.Timer(10, killAlarma2, args=[client_process])
+                timer = threading.Timer(t + 2, killAlarma3, 
+                                        args=[atack_process,client_process,server_process])
+                timer.start()
+                #net.iperf(hosts = [C,V], seconds = 10)
+                timer.join()
+                #A.cmdPrint("kill %hping3")
+                #t_ataque.iperfMeasure() # Mostrando salida en pantalla
+                #t_ataque.iperfMeasure(filename = nombreArchivo) # Llevando salida a un archivo
+                log.close()
+                CLI(net)
+                net.stop()
+
+
 
 if __name__ == "__main__":
     # test_ping_normal(ue1,'ping_normal_ryu.log')
@@ -550,7 +446,9 @@ if __name__ == "__main__":
     # test_iperf_normal(ue3,'iperf_normal_ryu.log')
     # test_iperf_normal(ue4,'iperf_normal_pox.log')
     # test_iperf_ataque(ue3,'iperf_ataque_ryu.log')
-    test_iperf_ataque(ue4,'iperf_ataque_pox.log')
+    # test_iperf_ataque(ue4,'iperf_ataque_pox.log')
+    # test_iperf_mix_con_timer(ue3,"salida_ryu.log")
+    test_iperf_mix_con_timer(ue4,"salida_pox.log")
 
 
 
