@@ -204,16 +204,6 @@ class TraficoAtaque(Trafico):
         self.timer.cancel()
    
 
-  
-
-
-# https://www.linode.com/docs/networking/diagnostics/install-iperf-to-diagnose-network-speed-in-linux/
-
-
-
-  
-
-
 ue1 = UnidadExperimental(topo=SingleSwitchTopo(k = 3, bw = 100),controller=RYU('c0'))
 ue1.definirNodosClaves('h1','h2','h3')
 
@@ -352,63 +342,34 @@ def test_iperf_mix_sin_timer(ue,nombreArchivo = None):
     A = net.get(A)
     C = net.get(C)
     V = net.get(V)
-    #t_ataque = TraficoAtaque(A,C,V)
-    # Arrancando la red
     net.start()
     net.pingAll()
     A.cmdPrint('hping3', '--flood','--rand-source',V.IP(),'&')
     net.iperf(hosts = [C,V], seconds = 10)
     A.cmdPrint("kill %hping3")
-    #t_ataque.iperfMeasure() # Mostrando salida en pantalla
-    #t_ataque.iperfMeasure(filename = nombreArchivo) # Llevando salida a un archivo
     CLI(net)
     net.stop()
 
 def test_iperf_mix_con_timer(ue,nombreArchivo = None, i = 1, t = 10):
 
-    def killAlarma(A,C,V):
-        info("Hola alarma\n")
-        C.cmdPrint("ps|grep iperf &")
-        A.cmdPrint("kill %hping3")
-        A.cmdPrint("ps")
-        V.cmdPrint("kill -9 %iperf &")
-        C.cmdPrint("kill -9 %iperf &")
-        info("Chao alarma\n")
-
-
-    def killAlarma2(p):
-        info("Hola alarma\n")
-        os.kill(p.pid, signal.SIGTERM)
-        info("Chao alarma\n")
-
-
-    def killAlarma3(p1,p2,p3):
+    def killAlarma(p1,p2,p3):
         info("Hola alarma\n")
         os.kill(p1.pid, signal.SIGTERM)
         os.kill(p2.pid, signal.SIGTERM)
         os.kill(p3.pid, signal.SIGTERM)
-        info("Chao alarma\n")
-        
+        info("Chao alarma\n")   
 
-    
-
-
-    # Parametros de la unidad experimental
-    # https://crashcourse.housegordon.org/python-subprocess.html
     setLogLevel("info")
     info("Configurando unidad experimental\n")
     info("Configurando trafico normal\n")
     info("Configurando la red\n")
     net = Mininet(topo = ue.getTopo(), controller=ue.getController(), link=TCLink ,build=False)
     net.build()
-    # Configurando clase asociada al trafico
     info("Configurando clase asociada al trafico\n")    
     [A,C,V] = ue.obtenerNodosClaves()
     A = net.get(A)
     C = net.get(C)
     V = net.get(V)
-    #t_ataque = TraficoAtaque(A,C,V)
-    # Arrancando la red
     net.start()
     net.pingAll()
     log = open(nombreArchivo,"w")
@@ -421,17 +382,11 @@ def test_iperf_mix_con_timer(ue,nombreArchivo = None, i = 1, t = 10):
             info("*** Lanzando el cliente iperf ***\n")
             client_process = C.popen(['iperf', '-c', str(V.IP()),'-i',str(i),
                               '-t',str(t)],stdout=log, stderr=log, shell=True)
-            if client_process != 0:
-                #timer = threading.Timer(10, killAlarma, args=[A,C,V] )
-                #timer = threading.Timer(10, killAlarma2, args=[client_process])
-                timer = threading.Timer(t + 2, killAlarma3, 
+            if client_process != 0:                
+                timer = threading.Timer(t + 2, killAlarma, 
                                         args=[atack_process,client_process,server_process])
                 timer.start()
-                #net.iperf(hosts = [C,V], seconds = 10)
                 timer.join()
-                #A.cmdPrint("kill %hping3")
-                #t_ataque.iperfMeasure() # Mostrando salida en pantalla
-                #t_ataque.iperfMeasure(filename = nombreArchivo) # Llevando salida a un archivo
                 log.close()
                 CLI(net)
                 net.stop()
