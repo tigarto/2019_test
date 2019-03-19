@@ -108,6 +108,8 @@ class TraficoAtaque(Trafico):
         self.atk = atk
         self.tipo_ataque = tipo_ataque # 1. Flooding and spoofing
         self.timer = None
+        self.timer_atk = None
+        self.process_attack = None
 
     def pingMeasure(self,
                     h_atk = None,
@@ -153,6 +155,7 @@ class TraficoAtaque(Trafico):
                         process_attack.kill()
                         info("End attack ***\n")
 
+    """
     def iperfMeasure(self,
                         h_atk = None,
                         h_src = None,
@@ -196,13 +199,70 @@ class TraficoAtaque(Trafico):
                         info("Es necesario colocar un nombre de archivo a la entrada para almacenar los resultados\n")
                         # Nota: Mirar si con cmdPrint se puede obtener el pid para killearlo como en el caso de Popen
                         # Puede que last pid sirva?
+    """
 
-    def killIperfClient(self,p1,p2,p3):
+    def iperfMeasure(self,
+                        h_atk = None,
+                        h_src = None,
+                        h_dst = None,
+                        intervalo = 1,
+                        tiempo = 10,
+                        t_inicio_atk = 4,
+                        filename = None
+                        ):
+            # Es obligatorio poner el nombre del archivo
+            h_C = h_src
+            h_V = h_dst
+            h_A = h_atk
+            if h_src == None and h_dst == None and h_atk == None:
+                h_C = self.src
+                h_V = self.dst
+                h_A = self.atk
+                if self.tipo_ataque == 1:
+                    info("++++++ Ataque DoS por flooding y spoofing +++++\n")
+                    if filename != None:
+                        log = open(filename,'w')
+                        info("Starting iperf server\n")                    
+                        server_process = h_V.popen(['iperf', '-s'])  # Victima  (Servidor)
+                        if server_process != 0:
+                            info("Starting iperf client\n")
+                            client_process = h_C.popen(['iperf', '-c',
+                                                        str(h_V.IP()),'-i',str(intervalo),
+                                                        '-t',str(tiempo)],stdout=log, stderr=log, shell=True)
+                            info("Starting iperf measure\n")                                                    
+                            if client_process != 0:
+                                # Lanzar timer para ataque   
+                                self.timer_atk = threading.Timer(t_inicio_atk, self.launchAttack)
+                                self.timer_atk.start()
+                                #self.timer.join()               
+
+                                self.timer = threading.Timer(tiempo + TIEMPO_ADICIONAL, self.killIperfClient, 
+                                                                 args=[client_process,server_process] )
+                                self.timer.start()
+                                self.timer.join()
+                                info("End iperf measure\n")
+                    else:
+                        info("Es necesario colocar un nombre de archivo a la entrada para almacenar los resultados\n")
+                        # Nota: Mirar si con cmdPrint se puede obtener el pid para killearlo como en el caso de Popen
+                        # Puede que last pid sirva?
+
+    def killIperfClient(self,p1,p2):
         p1.kill()
         p2.kill()
-        p3.kill()
+        self.attack_process.kill()
         self.timer.cancel()
-   
+
+    def launchAttack(self):
+        info("Launch attack: %s ---> %s\n" % (str(self.atk.IP()), str(self.dst.IP())))
+        self.attack_process = self.atk.popen(['hping3', '--flood',
+                                    '--rand-source',
+                                    self.dst.IP()])  # Atacante
+        if self.attack_process != 0:
+            self.timer_atk.cancel()
+
+
+        
+
 
 ue1 = UnidadExperimental(topo=SingleSwitchTopo(k = 3, bw = 100),controller=RYU('c0'))
 ue1.definirNodosClaves('h1','h2','h3')
@@ -304,7 +364,7 @@ def test_ping_ataque(ue,nombreArchivo = None):
     CLI(net)
     net.stop()
 
-def test_iperf_ataque(ue,nombreArchivo = None):
+def test_iperf_ataque(ue,t_medida = 10, t_start_ataque = 4,nombreArchivo = None):
     # Parametros de la unidad experimental
     setLogLevel("info")
     info("Configurando unidad experimental\n")
@@ -312,6 +372,8 @@ def test_iperf_ataque(ue,nombreArchivo = None):
     info("Configurando la red\n")
     net = Mininet(topo = ue.getTopo(), controller=ue.getController(), link=TCLink ,build=False)
     net.build()
+    info("Waiting 5 seconds...\n")
+    sleep(5)
     # Configurando clase asociada al trafico
     info("Configurando clase asociada al trafico\n")    
     [A,C,V] = ue.obtenerNodosClaves()
@@ -323,7 +385,7 @@ def test_iperf_ataque(ue,nombreArchivo = None):
     net.start()
     net.pingAll()
     #t_ataque.iperfMeasure() # Mostrando salida en pantalla
-    t_ataque.iperfMeasure(filename = nombreArchivo) # Llevando salida a un archivo
+    t_ataque.iperfMeasure(filename = nombreArchivo, tiempo=t_medida,t_inicio_atk=t_start_ataque) # Llevando salida a un archivo
     CLI(net)
     net.stop()
 
@@ -394,16 +456,24 @@ def test_iperf_mix_con_timer(ue,nombreArchivo = None, i = 1, t = 10):
 
 
 if __name__ == "__main__":
+
     # test_ping_normal(ue1,'ping_normal_ryu.log')
     # test_ping_normal(ue2,'ping_normal_pox.log')
     # test_ping_ataque(ue1,'ping_ataque_ryu.log')
     # test_ping_ataque(ue2,'ping_ataque_pox.log')
     # test_iperf_normal(ue3,'iperf_normal_ryu.log')
     # test_iperf_normal(ue4,'iperf_normal_pox.log')
+    "******************************************\n"
+    "Deben ser revisados\n"
     # test_iperf_ataque(ue3,'iperf_ataque_ryu.log')
     # test_iperf_ataque(ue4,'iperf_ataque_pox.log')
     # test_iperf_mix_con_timer(ue3,"salida_ryu.log")
-    test_iperf_mix_con_timer(ue4,"salida_pox.log")
+    """****************************************\n"""
+    
+    #test_iperf_mix_con_timer(ue4,"salida_pox.log")
+    #####
+    test_iperf_ataque(ue3,t_medida=20,t_start_ataque=5,nombreArchivo = 'iperf_ataque_ryu.log')
+    #test_iperf_ataque(ue4,t_medida=20,t_start_ataque=5,'iperf_ataque_pox.log')
 
 
 
