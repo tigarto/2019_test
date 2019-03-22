@@ -54,8 +54,6 @@ if __name__ == "__main__":
                 filename
 
         info("%s\n"%(comando))
-        # args = ("-I", list_interfaces,"-o", "csv", "-t", str(1000), ">", filename, "&")
-        # os.execvp("bwm-ng", args)
         os.system(comando)
     
 
