@@ -364,3 +364,16 @@ TCP window size: 85.3 KByte (default)
 containernet> 
 ```
 
+**Conclusiones**:
+1. Hay problemas cuando se evaluan ataques con POX, pues en este las medidas iperf se bloquean al parecer por que el ancho de banda.
+2. Se va a probar lanzando el ataque despues de iniciar el cliente iperf.
+
+
+
+## Referencias ##
+
+1. https://intronetworks.cs.luc.edu/current/html/mininet.html
+2. https://crashcourse.housegordon.org/python-subprocess.html
+3. https://www.linode.com/docs/networking/diagnostics/install-iperf-to-diagnose-network-speed-in-linux/
+
+
