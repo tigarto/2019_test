@@ -1,0 +1,349 @@
+sudo ovs-ofctl show s1
+OFPT_FEATURES_REPLY (xid=0x2): dpid:0000000000000001
+n_tables:254, n_buffers:256
+capabilities: FLOW_STATS TABLE_STATS PORT_STATS QUEUE_STATS ARP_MATCH_IP
+actions: output enqueue set_vlan_vid set_vlan_pcp strip_vlan mod_dl_src mod_dl_dst mod_nw_src mod_nw_dst mod_nw_tos mod_tp_src mod_tp_dst
+ 1(s1-eth1): addr:92:86:2b:b5:65:ad
+     config:     0
+     state:      0
+     current:    10GB-FD COPPER
+     speed: 10000 Mbps now, 0 Mbps max
+ 2(s1-eth2): addr:16:78:40:b1:51:b8
+     config:     0
+     state:      0
+     current:    10GB-FD COPPER
+     speed: 10000 Mbps now, 0 Mbps max
+ LOCAL(s1): addr:d2:87:34:e2:0b:4e
+     config:     PORT_DOWN
+     state:      LINK_DOWN
+     speed: 0 Mbps now, 0 Mbps max
+OFPT_GET_CONFIG_REPLY (xid=0x4): frags=normal miss_send_len=0
+
+
+tigarto@fuck-pc:~$ sudo ovs-ofctl dump-desc s1
+OFPST_DESC reply (xid=0x2):
+Manufacturer: Nicira, Inc.
+Hardware: Open vSwitch
+Software: 2.5.5
+Serial Num: None
+DP Description: None
+
+
+tigarto@fuck-pc:~$ sudo ovs-ofctl dump-tables s1
+OFPST_TABLE reply (xid=0x2):
+  table 0 ("classifier"):
+    active=0, lookup=10, matched=0
+    max_entries=1000000
+    matching:
+      in_port: exact match or wildcard
+      eth_src: exact match or wildcard
+      eth_dst: exact match or wildcard
+      eth_type: exact match or wildcard
+      vlan_vid: exact match or wildcard
+      vlan_pcp: exact match or wildcard
+      ip_src: exact match or wildcard
+      ip_dst: exact match or wildcard
+      nw_proto: exact match or wildcard
+      nw_tos: exact match or wildcard
+      tcp_src: exact match or wildcard
+      tcp_dst: exact match or wildcard
+
+  table 1 ("table1"):
+    active=0, lookup=0, matched=0
+    (same features)
+
+  table 2 ("table2"): ditto
+  table 3 ("table3"): ditto
+  table 4 ("table4"): ditto
+  table 5 ("table5"): ditto
+  table 6 ("table6"): ditto
+  table 7 ("table7"): ditto
+  table 8 ("table8"): ditto
+  table 9 ("table9"): ditto
+  table 10 ("table10"): ditto
+
+....
+  table 249 ("table249"): ditto
+  table 250 ("table250"): ditto
+  table 251 ("table251"): ditto
+  table 252 ("table252"): ditto
+  table 253 ("table253"): ditto
+
+
+tigarto@fuck-pc:~$ sudo ovs-ofctl dump-table-features s1
+ovs-ofctl: dump-table-features needs OpenFlow 1.3 or later ('-O OpenFlow13')
+
+tigarto@fuck-pc:~$ sudo ovs-ofctl dump-table-desc s1
+ovs-ofctl: dump-table-desc needs OpenFlow 1.4 or later ('-O OpenFlow14')
+
+
+sudo ovs-ofctl dump-table-features -O OpenFlow13 s1 
+  table 0 ("classifier"):
+    metadata: match=0xffffffffffffffff write=0xffffffffffffffff
+    max_entries=1000000
+    instructions (table miss and others):
+      next tables: 1-253
+      instructions: meter,apply_actions,clear_actions,write_actions,write_metadata,goto_table
+      Write-Actions and Apply-Actions features:
+        actions: output group set_field strip_vlan push_vlan mod_nw_ttl dec_ttl set_mpls_ttl dec_mpls_ttl push_mpls pop_mpls set_queue
+        supported on Set-Field: tun_id tun_src tun_dst tun_ipv6_src tun_ipv6_dst tun_flags tun_gbp_id tun_gbp_flags tun_metadata0 tun_metadata1 tun_metadata2 tun_metadata3 tun_metadata4 tun_metadata5 tun_metadata6 tun_metadata7 tun_metadata8 tun_metadata9 tun_metadata10 tun_metadata11 tun_metadata12 tun_metadata13 tun_metadata14 tun_metadata15 tun_metadata16 tun_metadata17 tun_metadata18 tun_metadata19 tun_metadata20 tun_metadata21 tun_metadata22 tun_metadata23 tun_metadata24 tun_metadata25 tun_metadata26 tun_metadata27 tun_metadata28 tun_metadata29 tun_metadata30 tun_metadata31 tun_metadata32 tun_metadata33 tun_metadata34 tun_metadata35 tun_metadata36 tun_metadata37 tun_metadata38 tun_metadata39 tun_metadata40 tun_metadata41 tun_metadata42 tun_metadata43 tun_metadata44 tun_metadata45 tun_metadata46 tun_metadata47 tun_metadata48 tun_metadata49 tun_metadata50 tun_metadata51 tun_metadata52 tun_metadata53 tun_metadata54 tun_metadata55 tun_metadata56 tun_metadata57 tun_metadata58 tun_metadata59 tun_metadata60 tun_metadata61 tun_metadata62 tun_metadata63 metadata in_port in_port_oxm pkt_mark ct_mark ct_label reg0 reg1 reg2 reg3 reg4 reg5 reg6 reg7 xreg0 xreg1 xreg2 xreg3 eth_src eth_dst vlan_tci vlan_vid vlan_pcp mpls_label mpls_tc ip_src ip_dst ipv6_src ipv6_dst ipv6_label nw_tos ip_dscp nw_ecn nw_ttl arp_op arp_spa arp_tpa arp_sha arp_tha tcp_src tcp_dst udp_src udp_dst sctp_src sctp_dst icmp_type icmp_code icmpv6_type icmpv6_code nd_target nd_sll nd_tll
+
+
+...
+
+  table 252 ("table252"):
+    metadata: match=0xffffffffffffffff write=0xffffffffffffffff
+    max_entries=1000000
+    instructions (table miss and others):
+      next tables: 253
+      (same instructions)
+      (same actions)
+    (same matching)
+
+  table 253 ("table253"):
+    metadata: match=0xffffffffffffffff write=0xffffffffffffffff
+    max_entries=1000000
+    instructions (table miss and others):
+      instructions: meter,apply_actions,clear_actions,write_actions,write_metadata
+      (same actions)
+    (same matching)
+
+
+
+
+sudo ovs-ofctl dump-ports s1
+OFPST_PORT reply (xid=0x2): 3 ports
+  port LOCAL: rx pkts=0, bytes=0, drop=18, errs=0, frame=0, over=0, crc=0
+           tx pkts=0, bytes=0, drop=0, errs=0, coll=0
+  port  1: rx pkts=12, bytes=936, drop=0, errs=0, frame=0, over=0, crc=0
+           tx pkts=44, bytes=5487, drop=0, errs=0, coll=0
+  port  2: rx pkts=12, bytes=936, drop=0, errs=0, frame=0, over=0, crc=0
+           tx pkts=44, bytes=5487, drop=0, errs=0, coll=0
+
+
+sudo ovs-ofctl dump-ports-desc s1
+OFPST_PORT_DESC reply (xid=0x2):
+ 1(s1-eth1): addr:92:86:2b:b5:65:ad
+     config:     0
+     state:      0
+     current:    10GB-FD COPPER
+     speed: 10000 Mbps now, 0 Mbps max
+ 2(s1-eth2): addr:16:78:40:b1:51:b8
+     config:     0
+     state:      0
+     current:    10GB-FD COPPER
+     speed: 10000 Mbps now, 0 Mbps max
+ LOCAL(s1): addr:d2:87:34:e2:0b:4e
+     config:     PORT_DOWN
+     state:      LINK_DOWN
+     speed: 0 Mbps now, 0 Mbps max
+
+ sudo ovs-ofctl dump-flows  s1
+NXST_FLOW reply (xid=0x4):
+
+sudo ovs-ofctl dump-aggregate  s1
+NXST_AGGREGATE reply (xid=0x4): packet_count=0 byte_count=0 flow_count=0
+
+
+-------------------------------- pingall
+
+sudo ovs-ofctl dump-ports s1
+OFPST_PORT reply (xid=0x2): 3 ports
+  port LOCAL: rx pkts=0, bytes=0, drop=21, errs=0, frame=0, over=0, crc=0
+           tx pkts=0, bytes=0, drop=0, errs=0, coll=0
+  port  1: rx pkts=17, bytes=1286, drop=0, errs=0, frame=0, over=0, crc=0
+           tx pkts=51, bytes=6110, drop=0, errs=0, coll=0
+  port  2: rx pkts=17, bytes=1286, drop=0, errs=0, frame=0, over=0, crc=0
+           tx pkts=51, bytes=6110, drop=0, errs=0, coll=0
+
+sudo ovs-ofctl dump-flows  s1
+NXST_FLOW reply (xid=0x4):
+ cookie=0x0, duration=54.275s, table=0, n_packets=1, n_bytes=42, idle_timeout=60, idle_age=54, priority=65535,arp,in_port=2,vlan_tci=0x0000,dl_src=0e:fe:3d:1a:ca:b0,dl_dst=86:44:7f:ab:71:19,arp_spa=10.0.0.2,arp_tpa=10.0.0.1,arp_op=2 actions=output:1
+ cookie=0x0, duration=49.162s, table=0, n_packets=1, n_bytes=42, idle_timeout=60, idle_age=49, priority=65535,arp,in_port=2,vlan_tci=0x0000,dl_src=0e:fe:3d:1a:ca:b0,dl_dst=86:44:7f:ab:71:19,arp_spa=10.0.0.2,arp_tpa=10.0.0.1,arp_op=1 actions=output:1
+ cookie=0x0, duration=49.161s, table=0, n_packets=1, n_bytes=42, idle_timeout=60, idle_age=49, priority=65535,arp,in_port=1,vlan_tci=0x0000,dl_src=86:44:7f:ab:71:19,dl_dst=0e:fe:3d:1a:ca:b0,arp_spa=10.0.0.1,arp_tpa=10.0.0.2,arp_op=2 actions=output:2
+ cookie=0x0, duration=54.274s, table=0, n_packets=1, n_bytes=98, idle_timeout=60, idle_age=54, priority=65535,icmp,in_port=1,vlan_tci=0x0000,dl_src=86:44:7f:ab:71:19,dl_dst=0e:fe:3d:1a:ca:b0,nw_src=10.0.0.1,nw_dst=10.0.0.2,nw_tos=0,icmp_type=8,icmp_code=0 actions=output:2
+ cookie=0x0, duration=54.274s, table=0, n_packets=1, n_bytes=98, idle_timeout=60, idle_age=54, priority=65535,icmp,in_port=2,vlan_tci=0x0000,dl_src=0e:fe:3d:1a:ca:b0,dl_dst=86:44:7f:ab:71:19,nw_src=10.0.0.2,nw_dst=10.0.0.1,nw_tos=0,icmp_type=0,icmp_code=0 actions=output:1
+ cookie=0x0, duration=54.263s, table=0, n_packets=1, n_bytes=98, idle_timeout=60, idle_age=54, priority=65535,icmp,in_port=2,vlan_tci=0x0000,dl_src=0e:fe:3d:1a:ca:b0,dl_dst=86:44:7f:ab:71:19,nw_src=10.0.0.2,nw_dst=10.0.0.1,nw_tos=0,icmp_type=8,icmp_code=0 actions=output:1
+ cookie=0x0, duration=54.263s, table=0, n_packets=1, n_bytes=98, idle_timeout=60, idle_age=54, priority=65535,icmp,in_port=1,vlan_tci=0x0000,dl_src=86:44:7f:ab:71:19,dl_dst=0e:fe:3d:1a:ca:b0,nw_src=10.0.0.1,nw_dst=10.0.0.2,nw_tos=0,icmp_type=0,icmp_code=0 actions=output:2
+
+sudo ovs-ofctl dump-aggregate  s1
+NXST_AGGREGATE reply (xid=0x4): packet_count=0 byte_count=0 flow_count=0
+
+
+--
+sudo ovs-dpctl-top 
+                                  Flow Summary                                  
+ Total: 0  errors: 0 Accumulate: off Duration: 0:00:01.066340                   
+                                              DESC                              
+            FIELDS (IN_PORT)                 COUNT   PACKETS     BYTES   AVERAGE
+tigarto@fuck-pc:~$ sudo ovs-dpctl-top -h
+usage: ovs-dpctl-top [-h] [-v] [-f FLOWFILES] [-V] [-s] [--host HOST] [-a]
+                     [--accumulate-decay ACCUMULATEDECAY] [-d DELAY]
+
+Top like behavior for ovs-dpctl dump-flows output.
+
+This program summarizes ovs-dpctl flow content by aggregating the number
+of packets, total bytes and occurrence of the following fields:
+
+  - Datapath in_port
+
+  - Ethernet type
+
+  - Source and destination MAC addresses
+
+  - IP protocol
+
+  - Source and destination IPv4 addresses
+
+  - Source and destination IPv6 addresses
+
+  - UDP and TCP destination port
+
+  - Tunnel source and destination addresses
+
+Output shows four values:
+  - FIELDS: the flow fields for example in_port(1).
+
+  - PACKETS: the total number of packets containing the flow field.
+
+  - BYTES: the total number of bytes containing the flow field. If units are
+  not present then values are in bytes.
+
+  - AVERAGE: the average packets size (BYTES/PACKET).
+
+  - COUNT: the number of lines in the dump-flow output contain the flow field.
+
+Top Behavior
+
+While in top mode, the default behavior, the following single character
+commands are supported:
+
+  a - toggles top in accumulate and live mode. Accumulate mode is described
+  below.
+
+  s - toggles which column is used to sort content in decreasing order. A
+  DESC title is placed over the column.
+
+  _ - a space indicating to collect dump-flow content again
+
+  h - halt output. Any character will restart sampling
+
+  f - cycle through flow fields. The initial field is in_port
+
+  q - q for quit.
+
+Accumulate Mode
+
+There are two supported modes: live and accumulate. The default is live.
+The parameter --accumulate  or the 'a' character in top mode enables the
+latter. In live mode, recent dump-flow content is presented.
+Where as accumulate mode keeps track of the prior historical
+information until the flow is reset not when the flow is purged. Reset
+flows are determined when the packet count for a flow has decreased from
+its previous sample. There is one caveat, eventually the system will
+run out of memory if, after the accumulate-decay period any flows that
+have not been refreshed are purged. The goal here is to free memory
+of flows that are not active. Statistics are not decremented. Their purpose
+is to reflect the overall history of the flow fields.
+
+Debugging Errors
+
+Parsing errors are counted and displayed in the status line at the beginning
+of the output. Use the --verbose option with --script to see what output
+ was not parsed, like this:
+$ ovs-dpctl dump-flows | ovs-dpctl-top --script --verbose
+
+Error messages will identify content that failed to parse.
+
+Access Remote Hosts
+
+The --host must follow the format user@hostname. This script simply calls
+'ssh user@Hostname' without checking for login credentials therefore public
+keys should be installed on the system identified by hostname, such as:
+
+$ ssh-copy-id user@hostname
+
+Consult ssh-copy-id man pages for more details.
+
+Expected usage
+
+$ ovs-dpctl-top
+
+or to run as a script:
+$ ovs-dpctl dump-flows > dump-flows.log
+$ ovs-dpctl-top --script --flow-file dump-flows.log
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --version         show version
+  -f FLOWFILES, --flow-file FLOWFILES
+                        file containing flows from ovs-dpctl dump-flow
+  -V, --verbose         enable debug level verbosity
+  -s, --script          Run from a script (no user interface)
+  --host HOST           Specify a user@host for retrieving flows seeAccessing
+                        Remote Hosts for more information
+  -a, --accumulate      Accumulate dump-flow content
+  --accumulate-decay ACCUMULATEDECAY
+                        Decay old accumulated flows. The default is 5 minutes.
+                        A value of 0 disables decay.
+  -d DELAY, --delay DELAY
+                        Delay in milliseconds to collect dump-flow content
+                        (sample rate).
+tigarto@fuck-pc:~$ 
+
+
+---
+
+
+ sudo ovs-dpctl -h
+ovs-dpctl: Open vSwitch datapath management utility
+usage: ovs-dpctl [OPTIONS] COMMAND [ARG...]
+  add-dp DP [IFACE...]     add new datapath DP (with IFACEs)
+  del-dp DP                delete local datapath DP
+  add-if DP IFACE...       add each IFACE as a port on DP
+  set-if DP IFACE...       reconfigure each IFACE within DP
+  del-if DP IFACE...       delete each IFACE from DP
+  dump-dps                 display names of all datapaths
+  show                     show basic info on all datapaths
+  show DP...               show basic info on each DP
+  dump-flows [DP]          display flows in DP
+  add-flow [DP] FLOW ACTIONS add FLOW with ACTIONS to DP
+  mod-flow [DP] FLOW ACTIONS change FLOW actions to ACTIONS in DP
+  get-flow [DP] ufid:UFID    fetch flow corresponding to UFID
+  del-flow [DP] FLOW         delete FLOW from DP
+  del-flows [DP]             delete all flows from DP
+  dump-conntrack [DP]        display conntrack entries
+  flush-conntrack [DP]       delete all conntrack entries
+Each IFACE on add-dp, add-if, and set-if may be followed by
+comma-separated options.  See ovs-dpctl(8) for syntax, or the
+Interface table in ovs-vswitchd.conf.db(5) for an options list.
+For COMMAND dump-flows, add-flow, mod-flow, del-flow and
+del-flows, DP is optional if there is only one datapath.
+
+Logging options:
+  -vSPEC, --verbose=SPEC   set logging levels
+  -v, --verbose            set maximum verbosity level
+  --log-file[=FILE]        enable logging to specified FILE
+                           (default: /var/log/openvswitch/ovs-dpctl.log)
+  --syslog-method=(libc|unix:file|udp:ip:port)
+                           specify how to send messages to syslog daemon
+  --syslog-target=HOST:PORT  also send syslog msgs to HOST:PORT via UDP
+
+Options for show and mod-flow:
+  -s,  --statistics           print statistics for port or flow
+
+Options for dump-flows:
+  -m, --more                  increase verbosity of output
+
+Options for mod-flow:
+  --may-create                create flow if it doesn't exist
+  --clear                     reset existing stats to zero
+
+Other options:
+  -t, --timeout=SECS          give up after SECS seconds
+  -h, --help                  display this help message
+  -V, --version               display version information
+tigarto@fuck-pc:~$ 
+
+
+
