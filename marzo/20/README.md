@@ -7,7 +7,17 @@
 3. https://www.tutorialspoint.com/python/os_popen.htm
 4. https://www.python-course.eu/os_module_shell.php
 5. https://crashcourse.housegordon.org/python-subprocess.html
-6. 
+6. http://dwoll.de/rexrepos/posts/dfSplitMerge.html
+7. https://pandas.pydata.org/pandas-docs/stable/user_guide/groupby.html
+8. https://www.datacamp.com/community/tutorials/pandas-split-apply-combine-groupby
+9. https://github.com/mininet/mininet/wiki/Teaching-and-Learning-with-Mininet
+10. https://wiki.onosproject.org/display/ONOS/Mininet+and+onos.py+workflow
+11. http://xmodulo.com/monitor-openflow-messages.html
+12. https://stackoverflow.com/questions/45763616/how-to-capture-openflow-packets-using-tshark	
+13. http://xmodulo.com/monitor-openflow-messages.html
+14. https://wiki.wireshark.org/OpenFlow
+15. https://stackabuse.com/pythons-os-and-subprocess-popen-commands/
+
 
 
 
@@ -55,3 +65,44 @@ Statistics > TCP Stream graphs
 tshark -r traza2_of.pcap.gz
 
 tshark -r traza2_of.pcap.gz -Y openflow_v4.type && tcp.port == 6653
+
+
+Ademas:
+
+hping3 --flood --rand-source 10.0.0.3
+https://github.com/KimiNewt/pyshark
+http://yenolam.com/writings/tshark.pdf
+http://xmodulo.com/monitor-openflow-messages.html
+https://stackoverflow.com/questions/45763616/how-to-capture-openflow-packets-using-tshark
+https://wiki.wireshark.org/OpenFlow
+https://www.cellstream.com/reference-reading/tipsandtricks/272-t-shark-usage-examples
+
+
+sudo tshark -i lo -d tcp.port==6653,openflow -O openflow_v4 -w capture-of1.pcap
+
+https://hackertarget.com/tshark-tutorial-and-filter-examples/
+https://www.activecountermeasures.com/blog-tshark-examples-for-extracting-ip-fields/
+https://linuxsimba.com/tshark-examples
+http://yenolam.com/writings/tshark.pdf
+
+https://medium.com/vera-worri/extracting-the-payload-from-tshark-directly-file-using-python-part-ii-994f587075c9
+
+
+solucion:
+https://askubuntu.com/questions/454734/running-wireshark-lua-error-during-loading
+
+
+https://gist.github.com/sweenzor/1685717
+
+https://www.saltycrane.com/blog/2011/11/how-get-username-home-directory-and-hostname-python/
+https://superuser.com/questions/81233/wireshark-permission-problem-in-ubuntu
+
+
+Veamos si aqui si:
+https://superuser.com/questions/81233/wireshark-permission-problem-in-ubuntu
+
+
+https://osqa-ask.wireshark.org/questions/54690/how-do-i-make-tshark-write-a-pcap-capture-rather-than-a-pcapng-capture
+
+sudo tshark -i lo -w ca_of1.pcap -F libpcap
+https://www.dragonjar.org/parseando-pcaps-con-tshark.xhtml
