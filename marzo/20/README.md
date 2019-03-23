@@ -1,6 +1,20 @@
 
 
 
+
+1. https://www.bogotobogo.com/python/python_subprocess_module.php
+2. https://www.journaldev.com/17416/python-subprocess
+3. https://www.tutorialspoint.com/python/os_popen.htm
+4. https://www.python-course.eu/os_module_shell.php
+5. https://crashcourse.housegordon.org/python-subprocess.html
+6. 
+
+
+
+```bash
+bwm-ng -I s1-eth1,s1-eth2,s1-eth3,lo -o csv -t 1000 > monitoreo.csv
+```
+
 ```bash
 sudo mn --topo=single,3 --mac --switch=ovsk,protocols=OpenFlow13 --controller=remote,ip=127.0.0.1:6653  --link=tc,bw=100 
 ```
