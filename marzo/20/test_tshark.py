@@ -11,33 +11,31 @@ from signal import SIGKILL
 from controlador import RYU,POX
 import os
 import subprocess
+import time
+
+# Solucion tomada de http://csie.nqu.edu.tw/smallko/sdn/openflow_pkts.htm
+
+
 
 if __name__ == "__main__":
     setLogLevel( 'info' )
     # Creando la red: RYU + Single topo
-    net = Mininet( topo=SingleSwitchTopo(k = 3), controller=RYU('c0'))
+    net = Mininet( topo=SingleSwitchTopo(k = 3), controller=RYU('c0'),build=False)
     # Obteniendo las interfaces de los switches  
     """
     Lanzando el proceso asociado al comando
     """
     
-    pid_hijo = os.fork()
+    # Proceso padre
+    info("Iniciando topologia mininet")
+    net.build()    
+    net.start()
+    net.getNodeByName('c0').cmd("tcpdump -i any -nn port 6653 -U -w mylog &")
+    time.sleep(3)
+    CLI( net )
+    net.stop()
+    net.getNodeByName('c0').cmd("pkill tcpdump")
 
-    if pid_hijo == 0:
-        # Proceso hijo 
-        
-        
-        comando = "tshark -i lo -d tcp.port==6653,openflow -O openflow_v4 -F pcap > capture_of1.pcap &"
-        info("%s\n"%(comando))
-        os.system(comando)
-
-    else:
-        # Proceso padre
-        info("Iniciando topologia mininet")
-        net.start()
-        CLI( net )
-        net.stop()
-        os.kill(pid_hijo.pid,SIGKILL)
     """
         info("Iniciando topologia mininet")
         net.start()
@@ -47,3 +45,5 @@ if __name__ == "__main__":
     """
 
 # hping3 --flood --rand-source 10.0.0.3
+
+# tshark -d tcp.port==6633,openflow -r mylog
