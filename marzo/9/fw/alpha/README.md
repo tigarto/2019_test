@@ -307,7 +307,7 @@ rtt min/avg/max/mdev = 0.036/0.072/0.106/0.022 ms
 Lo que se midió anteiormente fue el ping.
 
 
-
+<!---
 
 ```python
 # ping
@@ -396,6 +396,7 @@ cliout = client.cmd( iperfArgs + '-t %d -c ' % seconds +
             error( 'could not parse iperf output: ' + iperfOutput )
             return ''
 ```
+-->
 
 ## Referencias ##
 1. https://www.bogotobogo.com/python/Multithread/python_multithreading_subclassing_Timer_Object.php
