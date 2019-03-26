@@ -298,31 +298,6 @@ def test_iperf_normal(ue,nombreArchivo = None):
     CLI(net)
     net.stop()
 
-"""
-def test_ping_ataque(ue,nombreArchivo = None):
-    # Parametros de la unidad experimental
-    setLogLevel("info")
-    info("Configurando unidad experimental\n")
-    info("Configurando trafico normal\n")
-    info("Configurando la red\n")
-    net = Mininet(topo = ue.getTopo(),controller=ue.getController(),build=False)
-    net.build()
-    # Configurando clase asociada al trafico
-    info("Configurando clase asociada al trafico\n")    
-    [A,C,V] = ue.obtenerNodosClaves()
-    A = net.get(A)
-    C = net.get(C)
-    V = net.get(V)
-    t_ataque = TraficoAtaque(A,C,V)
-    # Arrancando la red
-    net.start()
-    net.pingAll()
-    t_ataque.pingMeasure() # Mostrando salida en pantalla
-    t_ataque.pingMeasure(filename = nombreArchivo) # Llevando salida a un archivo
-    CLI(net)
-    net.stop()
-"""
-
 def test_iperf_ataque(ue,t_medida = 10, t_start_ataque = 4,nombreArchivo = None):
     # Parametros de la unidad experimental
     setLogLevel("info")
@@ -343,7 +318,6 @@ def test_iperf_ataque(ue,t_medida = 10, t_start_ataque = 4,nombreArchivo = None)
     # Arrancando la red
     net.start()
     net.pingAll()
-    #t_ataque.iperfMeasure() # Mostrando salida en pantalla
     t_ataque.iperfMeasure(filename = nombreArchivo, tiempo=t_medida,t_inicio_atk=t_start_ataque) # Llevando salida a un archivo
     CLI(net)
     net.stop()
@@ -368,99 +342,20 @@ def test_ping_ataque(ue,t_medida = 10, t_start_ataque = 4,nombreArchivo = None):
     # Arrancando la red
     net.start()
     net.pingAll()
-    #t_ataque.iperfMeasure() # Mostrando salida en pantalla
     t_ataque.pingMeasure(filename = nombreArchivo,veces=t_medida,t_inicio_atk=t_start_ataque)
     CLI(net)
     info("chao")
     net.stop()
 
 
-def test_iperf_mix_sin_timer(ue,nombreArchivo = None):
-    # Parametros de la unidad experimental
-    setLogLevel("info")
-    info("Configurando unidad experimental\n")
-    info("Configurando trafico normal\n")
-    info("Configurando la red\n")
-    net = Mininet(topo = ue.getTopo(), controller=ue.getController(), link=TCLink ,build=False)
-    net.build()
-    # Configurando clase asociada al trafico
-    info("Configurando clase asociada al trafico\n")    
-    [A,C,V] = ue.obtenerNodosClaves()
-    A = net.get(A)
-    C = net.get(C)
-    V = net.get(V)
-    net.start()
-    net.pingAll()
-    A.cmdPrint('hping3', '--flood','--rand-source',V.IP(),'&')
-    net.iperf(hosts = [C,V], seconds = 10)
-    A.cmdPrint("kill %hping3")
-    CLI(net)
-    net.stop()
-
-
-
-
-
-def test_iperf_mix_con_timer(ue,nombreArchivo = None, i = 1, t = 10):
-
-    def killAlarma(p1,p2,p3):
-        info("Hola alarma\n")
-        os.kill(p1.pid, signal.SIGTERM)
-        os.kill(p2.pid, signal.SIGTERM)
-        os.kill(p3.pid, signal.SIGTERM)
-        info("Chao alarma\n")   
-
-    setLogLevel("info")
-    info("Configurando unidad experimental\n")
-    info("Configurando trafico normal\n")
-    info("Configurando la red\n")
-    net = Mininet(topo = ue.getTopo(), controller=ue.getController(), link=TCLink ,build=False)
-    net.build()
-    info("Configurando clase asociada al trafico\n")    
-    [A,C,V] = ue.obtenerNodosClaves()
-    A = net.get(A)
-    C = net.get(C)
-    V = net.get(V)
-    net.start()
-    net.pingAll()
-    log = open(nombreArchivo,"w")
-    info("*** Iniciando el servidor iperf ***\n")
-    server_process = V.popen(['iperf','-s'])
-    if server_process != 0:
-        info("*** Lanzando el ataque ***\n")  
-        atack_process = A.popen(['hping3', '--flood','--rand-source',str(V.IP())])
-        if atack_process != 0:
-            info("*** Lanzando el cliente iperf ***\n")
-            client_process = C.popen(['iperf', '-c', str(V.IP()),'-i',str(i),
-                              '-t',str(t)],stdout=log, stderr=log, shell=True)
-            if client_process != 0:                
-                timer = threading.Timer(t + 2, killAlarma, 
-                                        args=[atack_process,client_process,server_process])
-                timer.start()
-                timer.join()
-                log.close()
-                CLI(net)
-                net.stop()
-
-
-
 if __name__ == "__main__":
-
+    info("*** Funciones de prueba ***\n")
     # test_ping_normal(ue1,'ping_normal_ryu.log')
     # test_ping_normal(ue2,'ping_normal_pox.log')
     # test_ping_ataque(ue1,'ping_ataque_ryu.log')
     # test_ping_ataque(ue2,'ping_ataque_pox.log')
     # test_iperf_normal(ue3,'iperf_normal_ryu.log')
     # test_iperf_normal(ue4,'iperf_normal_pox.log')
-    "******************************************\n"
-    "Deben ser revisados\n"
-    # test_iperf_ataque(ue3,'iperf_ataque_ryu.log')
-    # test_iperf_ataque(ue4,'iperf_ataque_pox.log')
-    # test_iperf_mix_con_timer(ue3,"salida_ryu.log")
-    """****************************************\n"""
-    
-    #test_iperf_mix_con_timer(ue4,"salida_pox.log")
-    #####
     test_ping_ataque(ue4,t_medida=20,t_start_ataque=5,nombreArchivo = 'ping_ataque_pox.log')
     #test_iperf_ataque(ue3,t_medida=20,t_start_ataque=5,nombreArchivo = 'iperf_ataque_ryu.log')
     #test_iperf_ataque(ue4,t_medida=20,t_start_ataque=5,'iperf_ataque_pox.log')
