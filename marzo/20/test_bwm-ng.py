@@ -12,12 +12,6 @@ from controlador import RYU,POX
 import os
 import subprocess
 
-
-
-
-
-
-
 if __name__ == "__main__":
     setLogLevel( 'info' )
     # Creando la red: RYU + Single topo
