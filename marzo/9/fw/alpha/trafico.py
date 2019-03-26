@@ -101,7 +101,6 @@ class TraficoNormal(Trafico):
                 iperf_server_process.kill()                
                 info("End iperf measure ***\n")
                 
-
 class TraficoAtaque(Trafico):
     def __init__(self, atk = None,src = None, dst = None, tipo_ataque = 1):
         Trafico.__init__(self, src = src, dst = dst)
@@ -117,6 +116,7 @@ class TraficoAtaque(Trafico):
                     h_dst = None,
                     veces = 10,
                     intervalo = 1.0,
+                    t_inicio_atk = 4,
                     filename = None):
         h_C = h_src
         h_V = h_dst
@@ -126,80 +126,28 @@ class TraficoAtaque(Trafico):
             h_V = self.dst
             h_A = self.atk
             if self.tipo_ataque == 1:
-                if filename == None:
-                    # Caso en el cual no se redirecciona a un archivo
-                    info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
-                    # Proceso hijo que lanza el araque
-                    process_attack = h_A.popen(['hping3', '--flood',
-                                                '--rand-source',
-                                                h_V.IP()])
-                    if (process_attack != 0):
-                        # Codigo del padre
-                        info("Starting pings ***\n")
-                        h_C.cmdPrint('ping -c', veces, '-i', intervalo, str(h_V.IP()))
+                if filename != None:
+                    info("Starting pings ***\n")
+                    # Lanzando el ping
+                    log = open(filename,'w')
+                    ping_process = h_C.popen(['ping', '-c', str(veces), '-i', str(intervalo), h_V.IP()],stdout=log, stderr=log, shell=True)
+                    if ping_process != 0:
+                        # Parte que lanza el ataque
+                        self.timer_atk = threading.Timer(t_inicio_atk, self.launchAttack)
+                        self.timer_atk.start()
+                    else:
+                        #ping_process.wait()
+                        # Timer que killea ping y el ataque
+                        self.timer = threading.Timer(veces + TIEMPO_ADICIONAL, self.killPing, 
+                                                                 args=[ping_process] )
+                        self.timer.start()
+                        self.timer.join()         
                         info("End pings ***\n")
-                        process_attack.kill()
+                        # Terminando el ataque despues de que se acaba la medicion del ping
                         info("End attack ***\n")
                 else:
-                    # Caso en el que se redirecciona la salida del ping a un archivo
-                    info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
-                    # Proceso hijo que lanza el araque
-                    process_attack = h_A.popen(['hping3', '--flood',
-                                                '--rand-source',
-                                                h_V.IP()])
-                    if (process_attack != 0):
-                        # Codigo del padre
-                        info("Starting pings ***\n")
-                        h_C.cmd('ping -c', veces, '-i', intervalo, str(h_V.IP()),'>',filename)
-                        info("End pings ***\n")
-                        process_attack.kill()
-                        info("End attack ***\n")
+                    info("No implementada")
 
-    """
-    def iperfMeasure(self,
-                        h_atk = None,
-                        h_src = None,
-                        h_dst = None,
-                        intervalo = 1,
-                        tiempo = 10,
-                        filename = None
-                        ):
-            # Es obligatorio poner el nombre del archivo
-            h_C = h_src
-            h_V = h_dst
-            h_A = h_atk
-            if h_src == None and h_dst == None and h_atk == None:
-                h_C = self.src
-                h_V = self.dst
-                h_A = self.atk
-                if self.tipo_ataque == 1:
-                    info("++++++ Ataque DoS por flooding y spoofing +++++\n")
-                    if filename != None:
-                        log = open(filename,'w')
-                        info("Starting iperf server\n")                    
-                        server_process = h_V.popen(['iperf', '-s'])  # Victima  (Servidor)
-                        if server_process != 0:
-                            info("Launch attack: %s ---> %s\n" % (str(h_A.IP()), str(h_V.IP())))
-                            attack_process = h_A.popen(['hping3', '--flood',
-                                                    '--rand-source',
-                                                    h_V.IP()])  # Atacante
-                            if attack_process != 0:
-                                # Iniciando cliente                                
-                                info("Starting iperf client\n")
-                                client_process = h_C.popen(['iperf', '-c',
-                                                    str(h_V.IP()),'-i',str(intervalo),
-                                                    '-t',str(tiempo)],stdout=log, stderr=log, shell=True)
-                                if client_process != 0:
-                                    self.timer = threading.Timer(tiempo + TIEMPO_ADICIONAL, self.killIperfClient, 
-                                                                 args=[client_process,server_process,attack_process] )
-                                    self.timer.start()
-                                    self.timer.join()
-                                info("Starting iperf measure\n")
-                    else:
-                        info("Es necesario colocar un nombre de archivo a la entrada para almacenar los resultados\n")
-                        # Nota: Mirar si con cmdPrint se puede obtener el pid para killearlo como en el caso de Popen
-                        # Puede que last pid sirva?
-    """
 
     def iperfMeasure(self,
                         h_atk = None,
@@ -251,6 +199,14 @@ class TraficoAtaque(Trafico):
         p2.kill()
         self.attack_process.kill()
         self.timer.cancel()
+
+    def killPing(self,p1):
+        # kill del proceso del ping
+        p1.kill()
+        # kill del proceso del ataque
+        self.attack_process.kill()
+        self.timer.cancel()
+
 
     def launchAttack(self):
         info("Launch attack: %s ---> %s\n" % (str(self.atk.IP()), str(self.dst.IP())))
@@ -340,7 +296,7 @@ def test_iperf_normal(ue,nombreArchivo = None):
     CLI(net)
     net.stop()
 
-
+"""
 def test_ping_ataque(ue,nombreArchivo = None):
     # Parametros de la unidad experimental
     setLogLevel("info")
@@ -363,6 +319,7 @@ def test_ping_ataque(ue,nombreArchivo = None):
     t_ataque.pingMeasure(filename = nombreArchivo) # Llevando salida a un archivo
     CLI(net)
     net.stop()
+"""
 
 def test_iperf_ataque(ue,t_medida = 10, t_start_ataque = 4,nombreArchivo = None):
     # Parametros de la unidad experimental
@@ -389,7 +346,33 @@ def test_iperf_ataque(ue,t_medida = 10, t_start_ataque = 4,nombreArchivo = None)
     CLI(net)
     net.stop()
 
-    
+def test_ping_ataque(ue,t_medida = 10, t_start_ataque = 4,nombreArchivo = None):
+    # Parametros de la unidad experimental
+    setLogLevel("info")
+    info("Configurando unidad experimental\n")
+    info("Configurando trafico normal\n")
+    info("Configurando la red\n")
+    net = Mininet(topo = ue.getTopo(), controller=ue.getController(), link=TCLink ,build=False)
+    net.build()
+    info("Waiting 5 seconds...\n")
+    sleep(5)
+    # Configurando clase asociada al trafico
+    info("Configurando clase asociada al trafico\n")    
+    [A,C,V] = ue.obtenerNodosClaves()
+    A = net.get(A)
+    C = net.get(C)
+    V = net.get(V)
+    t_ataque = TraficoAtaque(A,C,V)
+    # Arrancando la red
+    net.start()
+    net.pingAll()
+    #t_ataque.iperfMeasure() # Mostrando salida en pantalla
+    t_ataque.pingMeasure(filename = nombreArchivo,veces=t_medida,t_inicio_atk=t_start_ataque)
+    #CLI(net)
+    info("chao")
+    net.stop()
+
+
 def test_iperf_mix_sin_timer(ue,nombreArchivo = None):
     # Parametros de la unidad experimental
     setLogLevel("info")
@@ -411,6 +394,10 @@ def test_iperf_mix_sin_timer(ue,nombreArchivo = None):
     A.cmdPrint("kill %hping3")
     CLI(net)
     net.stop()
+
+
+
+
 
 def test_iperf_mix_con_timer(ue,nombreArchivo = None, i = 1, t = 10):
 
@@ -472,7 +459,8 @@ if __name__ == "__main__":
     
     #test_iperf_mix_con_timer(ue4,"salida_pox.log")
     #####
-    test_iperf_ataque(ue3,t_medida=20,t_start_ataque=5,nombreArchivo = 'iperf_ataque_ryu.log')
+    test_ping_ataque(ue4,t_medida=20,t_start_ataque=5,nombreArchivo = 'iperf_ping_pox.log')
+    #test_iperf_ataque(ue3,t_medida=20,t_start_ataque=5,nombreArchivo = 'iperf_ataque_ryu.log')
     #test_iperf_ataque(ue4,t_medida=20,t_start_ataque=5,'iperf_ataque_pox.log')
 
 
