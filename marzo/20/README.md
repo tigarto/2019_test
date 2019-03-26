@@ -106,3 +106,18 @@ https://osqa-ask.wireshark.org/questions/54690/how-do-i-make-tshark-write-a-pcap
 
 sudo tshark -i lo -w ca_of1.pcap -F libpcap
 https://www.dragonjar.org/parseando-pcaps-con-tshark.xhtml
+
+
+Aqui esta la solucion: http://csie.nqu.edu.tw/smallko/sdn/openflow_pkts.htm
+
+**Marzo 23**:
+
+https://medium.com/@vworri/extracting-the-payload-from-a-pcap-file-using-python-d938d7622d71
+https://wiki.wireshark.org/Python
+https://kiminewt.github.io/pyshark/
+https://github.com/secdev/scapy/blob/master/scapy/contrib/openflow.py
+https://github.com/krish7919/openflow-test
+https://pdfs.semanticscholar.org/2e7c/8514ab7205f69bfa5e24721a33628ca087ef.pdf
+https://www.omicsonline.org/open-access/scapya-python-tool-for-security-testing-jcsb-1000182.pdf
+https://scapy.net/conf/scapy_T2.pdf
+https://blogs.sans.org/pen-testing/files/2016/04/ScapyCheatSheet_v0.2.pdf
