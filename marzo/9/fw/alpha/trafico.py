@@ -141,10 +141,12 @@ class TraficoAtaque(Trafico):
                         self.timer = threading.Timer(veces + TIEMPO_ADICIONAL, self.killPing, 
                                                                  args=[ping_process] )
                         self.timer.start()
-                        self.timer.join()         
-                        info("End pings ***\n")
-                        # Terminando el ataque despues de que se acaba la medicion del ping
-                        info("End attack ***\n")
+                        self.timer.join() 
+                    ping_process.wait() 
+                    info("End pings ***\n")
+                    # Terminando el ataque despues de que se acaba la medicion del ping
+                    info("End attack ***\n")   
+                         
                 else:
                     info("No implementada")
 
@@ -368,7 +370,7 @@ def test_ping_ataque(ue,t_medida = 10, t_start_ataque = 4,nombreArchivo = None):
     net.pingAll()
     #t_ataque.iperfMeasure() # Mostrando salida en pantalla
     t_ataque.pingMeasure(filename = nombreArchivo,veces=t_medida,t_inicio_atk=t_start_ataque)
-    #CLI(net)
+    CLI(net)
     info("chao")
     net.stop()
 
@@ -459,7 +461,7 @@ if __name__ == "__main__":
     
     #test_iperf_mix_con_timer(ue4,"salida_pox.log")
     #####
-    test_ping_ataque(ue4,t_medida=20,t_start_ataque=5,nombreArchivo = 'iperf_ping_pox.log')
+    test_ping_ataque(ue4,t_medida=20,t_start_ataque=5,nombreArchivo = 'ping_ataque_pox.log')
     #test_iperf_ataque(ue3,t_medida=20,t_start_ataque=5,nombreArchivo = 'iperf_ataque_ryu.log')
     #test_iperf_ataque(ue4,t_medida=20,t_start_ataque=5,'iperf_ataque_pox.log')
 
