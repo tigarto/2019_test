@@ -7,62 +7,6 @@ from pyDOE import fullfact
 import random
 
 
-
-""" Caso Ryu-Normal """
-
-def experimentoRyuNormal():
-    # Unidad experimental
-    ryu_normal = UnidadExperimental()
-    ryu_normal.setTopo(TopologiaTest())
-    ryu_normal.setController('ryu')
-    ryu_normal.definirNodosClaves(C = 'h2', V = 'h3')
-    # Experimento
-    exp_ryu_normal = Experimento()
-    exp_ryu_normal.configureParams(ryu_normal)
-    exp_ryu_normal.configurarTrafico('normal')
-    return exp_ryu_normal
-
-""" Caso Ryu-Ataque """
-def experimentoRyuAtaque():
-    # Unidad experimental
-    ryu_ataque = UnidadExperimental()
-    ryu_ataque.setTopo(TopologiaTest())
-    ryu_ataque.setController('ryu')
-    ryu_ataque.definirNodosClaves(A = 'h1',C = 'h2', V = 'h3')
-    # Experimento
-    exp_ryu_ataque = Experimento()
-    exp_ryu_ataque.configureParams(ryu_ataque)
-    exp_ryu_ataque.configurarTrafico('ataque')
-    return exp_ryu_ataque
-
-""" Caso POX-Normal """
-def experimentoPOXNormal():
-    # Unidad experimental
-    pox_normal = UnidadExperimental()
-    pox_normal.setTopo(TopologiaTest())
-    pox_normal.setController('pox')
-    pox_normal.definirNodosClaves(C = 'h2', V = 'h3')
-    # Experimento
-    exp_pox_normal = Experimento()
-    exp_pox_normal.configureParams(pox_normal)
-    exp_pox_normal.configurarTrafico('normal')
-    return exp_pox_normal
-
-""" Caso POX-Ataque """
-def experimentoPOXAtaque():
-    # Unidad experimental
-    pox_ataque = UnidadExperimental()
-    pox_ataque.setTopo(TopologiaTest())
-    pox_ataque.setController('pox')
-    pox_ataque.definirNodosClaves(A = 'h1',C = 'h2', V = 'h3')
-    
-    # Experimento
-    exp_pox_ataque = Experimento()
-    exp_pox_ataque.configureParams(pox_ataque)
-    exp_pox_ataque.configurarTrafico('ataque')
-    return exp_pox_ataque
-
-
 """ Configuracion de los parametros del disenho experimental"""
 
 '''
