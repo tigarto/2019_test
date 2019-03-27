@@ -26,10 +26,11 @@ import random
 
 
 """ Caso Ryu-Normal """
+
 def experimentoRyuNormal():
     # Unidad experimental
     ryu_normal = UnidadExperimental()
-    ryu_normal.setTopo(topologias['topoTest'])
+    ryu_normal.setTopo(TopologiaTest())
     ryu_normal.setController('ryu')
     ryu_normal.definirNodosClaves(C = 'h2', V = 'h3')
     # Experimento
@@ -42,7 +43,7 @@ def experimentoRyuNormal():
 def experimentoRyuAtaque():
     # Unidad experimental
     ryu_ataque = UnidadExperimental()
-    ryu_ataque.setTopo(topologias['topoTest'])
+    ryu_ataque.setTopo(TopologiaTest())
     ryu_ataque.setController('ryu')
     ryu_ataque.definirNodosClaves(A = 'h1',C = 'h2', V = 'h3')
     # Experimento
@@ -55,7 +56,7 @@ def experimentoRyuAtaque():
 def experimentoPOXNormal():
     # Unidad experimental
     pox_normal = UnidadExperimental()
-    pox_normal.setTopo(topologias['topoTest'])
+    pox_normal.setTopo(TopologiaTest())
     pox_normal.setController('pox')
     pox_normal.definirNodosClaves(C = 'h2', V = 'h3')
     # Experimento
@@ -68,7 +69,7 @@ def experimentoPOXNormal():
 def experimentoPOXAtaque():
     # Unidad experimental
     pox_ataque = UnidadExperimental()
-    pox_ataque.setTopo(topologias['topoTest'])
+    pox_ataque.setTopo(TopologiaTest())
     pox_ataque.setController('pox')
     pox_ataque.definirNodosClaves(A = 'h1',C = 'h2', V = 'h3')
     
@@ -87,10 +88,11 @@ Descripcion del experimento
    -> BW: ancho de banda
    -> RTT_avg 
    -> PacketLoss
+   ******* Por agregar (CPU, PACKET_IN, PACKET_OUT, FLOW_MOD, Rx..., Tx...)
 2. Factores:
    -> Controlador: Ryu, POX
    -> Tipo de trafico: Normal, tasa fija, flooding
-      - Normal (background): hping3 -c 6000 IP_V
+      - Normal (background): hping3 -c 6000 IP_V (...)
       - Flooding y spoofing: hping3 ...
 3. Numero de tratamientos: 20 tratamientos: 2^2
 4. Numero de replicas por tratamiento: 2.   
@@ -98,248 +100,111 @@ Descripcion del experimento
 
 # En el momento por cuestiones de test solo van a ser dos pruebas
 
-def experimentos(numReplicasPorTratamiento = 2):
+def obtenerTratamientos(niveles):
+    num_factores = len(niveles)
+    niveles_factor = {}
+    for k in niveles:
+        niveles_factor[k] = len(niveles[k])
+    # print(niveles_factor.keys(),niveles_factor.values())
+    tratamientos = fullfact(niveles_factor.values())    
+    return tratamientos
 
-    # Parametros del experimento
-    numNivelesFactor1 = 2
-    numNivelesFactor2 = 3    
+def codificarTratamientos(niveles):
+    factores = niveles.keys()
+    tr = obtenerTratamientos(niveles)
+    tr = tr.astype(int)
+    tr_cod = tr.astype(str)
+    #print(tr_cod)
+    num_rows = tr.shape[0]
+    i = 0
+    index_fac = 0
+    index_row = 0
+    for e in np.nditer(tr, order='F'):        
+        if i < num_rows:
+            #e = factores[index_fac][int(e)]
+            #print(e)
+            
+            #ii = int(e)
+            #print(type(i))
+             
+            #e = niveles[factores[index_fac]][e]   
+            i += 1  
+        else:
+            index_row = 0
+            i = 0
+            index_fac += 1
+        # print(niveles[factores[index_fac]][e])
+        tr_cod[index_row][index_fac] = niveles[factores[index_fac]][e]
+        index_row += 1
+        #print(int(e))
     
+    #print tr_cod
+    return tr_cod
 
-    # Generando los tratamientos
-    tratamientos = fullfact([numNivelesFactor1,numNivelesFactor2])
-    #tratamientos.columns = ['controlador', 'trafico']
+def obtenerNumeroTratamientos(tratamientos):
+    return tratamientos.shape[0]
 
-    # Codificacion de los niveles
-
-    niveles = { 'controlador': { 0:'ryu', 1:'pox'},
-                 'trafico': { 0:'normal', 1:'ataque1', 2:'ataque2'}
-    }
-    
-
-    tratamientos = tratamientos.astype(int)
-    tratamientos = tratamientos.astype(str)
-    
-    
-    # Definiendo los tratamientos
-    tratamientos[:,0][tratamientos[:,0] == '0'] = niveles['controlador'][0]
-    tratamientos[:,0][tratamientos[:,0] == '1'] = niveles['controlador'][1]
-    tratamientos[:,1][tratamientos[:,1] == '0'] = niveles['trafico'][0]
-    tratamientos[:,1][tratamientos[:,1] == '1'] = niveles['trafico'][1]
-    tratamientos[:,1][tratamientos[:,1] == '2'] = niveles['trafico'][2]
-
-    print("****************** Tratamientos ******************")
-    print (tratamientos)
-
-    numTratamientos = tratamientos.shape[0] # Numero de tratamientos
-    # print(tratamientos[0,0])
-    # print(numTratamientos)
-
+def crearMatrixReplicas(numTratamientos,numReplicasPorTratamiento):
     random.seed() # Semilla para la aleatorizacion para las pruebas
     total_tests = np.arange(1,numTratamientos*numReplicasPorTratamiento + 1) # Lista ordenada de acuerdo al
                                                                              # numero total de replicas
     random.shuffle(total_tests) # Barajando la lista para aleatorizar el orden de las pruebas
     matrixReplicas = total_tests.reshape(numTratamientos,numReplicasPorTratamiento) # Generando la matrix a partir de la lista
     # print(matrixReplicas)
-
-    print
-    print    
-    print("****************** Matrix con el orden de experimentacion ******************")
-    print(matrixReplicas)
+    return matrixReplicas
 
 
+def definirOrdenTratamientos(matrixReplicas,tratamientos):
     ordenTratamientos = []
-    for rep in range(1,numReplicasPorTratamiento*numTratamientos + 1):
+    print(tratamientos[0])
+    print(matrixReplicas.shape)
+    for rep in range(1,matrixReplicas.shape[0]*matrixReplicas.shape[1] + 1):
+        index = np.where(matrixReplicas==rep)
+        rep += 1
+        #print(index)
+        #print(index[0])
+        #print(tratamientos[index[0]])
+        E = tratamientos[index[0]][0].tolist()
+        #print(E)
+        ordenTratamientos.append(E)
+    return ordenTratamientos
+        
+    """
+    for rep in range(1,matrixReplicas.shape[0]*matrixReplicas.shape[1] + 1):
         index = np.where(matrixReplicas==rep)
         rep += 1
         # print(index)
         # print(tratamientos[index[0]][0])
         E = tratamientos[index[0]][0]
         ordenTratamientos.append([E[0],E[1]])
-
-    print(ordenTratamientos)
-    print
-    print
-    print("****************** Orden de ejecucion de las simulaciones ******************")
-    for e in ordenTratamientos:
-        print e
-        
-
-
-    
-
-    
-
-
-    
-    filenames = []
-    nameFile = ''
-    i = 0
     """
 
-    for t in ordenTratamientos:
-        i += 1
-        for test in ["ping", "iperf"]:
-            if t[0] == 'ryu':
-                # RYU
-                if t[1] == 'ataque':
-                    # RYU - ATAQUE
-                    nameFile = "ryu-ataque-"
-                    nameFile += test
-                    if test == "iperf":
-                        experimento["ryu-ataque"]["iperf"] += 1
-                        nameFile += "-"+ str(experimento["ryu-ataque"]["iperf"]) + ".log"
-                    else:
-                        experimento["ryu-ataque"]["ping"] += 1
-                        nameFile += "-" + str(experimento["ryu-ataque"]["ping"]) + ".log"
-                else:
-                    nameFile = "ryu-normal-"
-                    nameFile += test
-                    if test == "iperf":
-                        experimento["ryu-normal"]["iperf"] += 1
-                        nameFile += "-" + str(experimento["ryu-normal"]["iperf"]) + ".log"
-                    else:
-                        experimento["ryu-normal"]["ping"] += 1
-                        nameFile += "-" + str(experimento["ryu-normal"]["ping"]) + ".log"
 
-            else:
-                # POX
-                if t[1] == 'ataque':
-                    # POX - ATAQUE
-                    nameFile = "pox-ataque-"
-                    nameFile += test
-                    if test == "iperf":
-                        experimento["pox-ataque"]["iperf"] += 1
-                        nameFile += "-" + str(experimento["pox-ataque"]["iperf"]) + ".log"
-                    else:
-                        experimento["pox-ataque"]["ping"] += 1
-                        nameFile += "-" + str(experimento["pox-ataque"]["ping"]) + ".log"
-                else:
-                    nameFile = "pox-normal-"
-                    nameFile += test
-                    if test == "iperf":
-                        experimento["pox-normal"]["iperf"] += 1
-                        nameFile += "-" + str(experimento["pox-normal"]["iperf"]) + ".log"
-                    else:
-                        experimento["pox-normal"]["ping"] += 1
-                        nameFile += "-" + str(experimento["pox-normal"]["ping"]) + ".log"
-            filenames.append(nameFile)
     
 
-    """
-    return filenames
-
-def imprimirArchivosLogGenerados(listaF, num_ren = 4):
-    for i in range(0,len(listaF)):
-        sys.stdout.write(listaF[i] + "  ")
-        if((i+1)%num_ren == 0):
-            print
-    return len(listaF)
-
-#filesLog = experimentos()
-#tam = imprimirArchivosLogGenerados(filesLog)
-#print(tam)
-
-
+"""
+tratamientos[:,0][tratamientos[:,0] == '0'] = niveles['controlador'][0]
+tratamientos[:,0][tratamientos[:,0] == '1'] = niveles['controlador'][1]
+tratamientos[:,1][tratamientos[:,1] == '0'] = niveles['trafico'][0]
+tratamientos[:,1][tratamientos[:,1] == '1'] = niveles['trafico'][1]
+tratamientos[:,1][tratamientos[:,1] == '2'] = niveles['trafico'][2]
+"""
 if __name__ == "__main__":
-    setLogLevel("info")
-    files_log = experimentos()
-    imprimirArchivosLogGenerados(files_log)
-    # files_log = ["pox-ataque-iperf-1.log", "pox-ataque-iperf-2.log"]
-    """
+    info("Ensayo")
+    niveles = { 'controlador': ['ryu','pox'],
+            'trafico': ['normal','ataque1','ataque2']
+    }
+    tratamientos = obtenerTratamientos(niveles)
+    print(tratamientos)
+    print(type(tratamientos))
+    tr_cod = codificarTratamientos(niveles)
+    n_tr = obtenerNumeroTratamientos(tr_cod)
+    m = crearMatrixReplicas(n_tr,20)
+    ot = definirOrdenTratamientos(m,tr_cod)
+    print(ot)
 
-    for fl_name in files_log:
-        print (fl_name + "\n")
-        fl = fl_name.strip('.log')
-        test = fl.split('-')[:3]
-        if test[0] == 'ryu':
-            # RYU
-            print('\n*******' + fl_name + '*******')
-            if test[1] == 'normal':
-                # RYU-NORMAL
-                ryu_normal = experimentoRyuNormal()
-                sleep(5) # Dando tiempo de construccion
-                if test[2] == 'iperf':
-                    # RYU-NORMAL-IPERF
-                    ryu_normal.startTest()
-                    sleep(10)
-                    ryu_normal.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
-                    ryu_normal.endTest()
-                else:
-                    # RYU-NORMAL-PING
-                    ryu_normal.startTest()
-                    sleep(10)
-                    ryu_normal.trafico.pingMeasure(filename=fl_name, veces = 20)
-                    ryu_normal.endTest()
-                ryu_normal.killTest()
-                ryu_normal.killController()
-            else:
-                # RYU-ATAQUE
-                ryu_ataque = experimentoRyuAtaque()
-                sleep(5) # Dando tiempo de construccion
-                if test[2] == 'iperf':
-                    # RYU-NORMAL-IPERF
-                    ryu_ataque.startTest()
-                    sleep(10)
-                    ryu_ataque.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
-                    ryu_ataque.endTest()
-                else:
-                    # RYU-NORMAL-PING
-                    ryu_ataque.startTest()
-                    sleep(10)
-                    ryu_ataque.trafico.pingMeasure(filename=fl_name, veces = 20)
-                    ryu_ataque.endTest()
-                ryu_ataque.killTest()
-                ryu_ataque.killController()
-        else:           
-            # POX
-            print('\n*******' + fl_name + '*******')
-            if test[1] == 'normal':
-                # POX-NORMAL                
-                pox_normal = experimentoPOXNormal()
-                sleep(5)
-                # Dando tiempo de construccion
-                if test[2] == 'iperf':
-                    # POX-NORMAL-IPERF
-                    pox_normal.startTest()
-                    sleep(10)
-                    pox_normal.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
-                    pox_normal.endTest()
-                else:
-                    # POX-NORMAL-PING
-                    pox_normal.startTest()
-                    sleep(10)
-                    pox_normal.trafico.pingMeasure(filename=fl_name, veces = 20)
-                    pox_normal.endTest()
-                pox_normal.killTest()
-                pox_normal.killController()
-            else:
-                sleep(10)
-                # POX-ATAQUE
-                pox_ataque = experimentoPOXAtaque()  
-                sleep(5)          
-                if test[2] == 'iperf':                    
-                    # RYU-NORMAL-IPERF
-                    pox_ataque.startTest()
-                    sleep(10)
-                    pox_ataque.trafico.iperfMeasure(filename=fl_name, tiempo = 20)
-                    pox_ataque.endTest()
-                else:                    
-                    # RYU-NORMAL-PING
-                    pox_ataque.startTest()
-                    sleep(10)
-                    pox_ataque.trafico.pingMeasure(filename=fl_name, veces = 20)
-                    pox_ataque.endTest()
-                pox_ataque.killTest()
-                pox_ataque.killController()            
-        
-        info("\n******* Experimento finalizado *******\n\n")
-        for i in range(10):
-            print('.')
-            sleep(1)
-        print()
-        info("\n******* Pasando al siguiente experimento *******\n\n")
-    """
-    print ("FIN EXPERIMENTOS")
+
+
 
 
 
