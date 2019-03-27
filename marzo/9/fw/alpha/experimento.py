@@ -52,17 +52,9 @@ class Experimento:
     def killTest(self):
         subprocess.call(["mn", "-c"])
 
-    def killController(self):
-        if self.inputs.getController() == 'ryu':
-            for proc in psutil.process_iter(attrs=['pid', 'name']):
-                if "ryu-manager" in proc.info['name']:
-                    os.kill(proc.info['pid'], 9)
-        else:
-            c0 = self.net.getNodeByName('c0') # Nombre del controlador para el experimento
-            port_pox = c0.port
-            subprocess.Popen(['sudo','fuser','-k',str(port_pox)+'/tcp'])
+    def killController(self,port = 6653):
+        subprocess.Popen(['sudo','fuser','-k',str(port)+'/tcp'])
                 
-
     def startTest(self):
         self.net.start()
 
