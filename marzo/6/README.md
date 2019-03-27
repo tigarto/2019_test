@@ -1,17 +1,38 @@
+# Como conduzco #
 
+## Para test ##
 
-## Aun pailas ##
+Usar test3.py que es el que sirve:
 
+1. Arranque el controlador:
 
-https://recursospython.com/guias-y-manuales/subprocess-creacion-y-comunicacion-con-procesos/
-https://kite.com/python/examples/5681/signal-kill-a-process
-https://gist.github.com/marcoagner/9926309
-http://devopstechie.com/how-to-get-cpu-utilization-and-memory-usage-in-python-psutil/
-http://www.marinamele.com/7-tips-to-time-python-scripts-and-control-memory-and-cpu-usage
-https://thispointer.com/python-get-list-of-all-running-processes-and-sort-by-highest-memory-usage/
-https://psutil.readthedocs.io/en/latest/
-https://www.blog.pythonlibrary.org/2016/06/16/python-101-redirecting-stdout/
-https://eli.thegreenplace.net/2015/redirecting-all-kinds-of-stdout-in-python/
+```bash
+sudo ryu-manager --verbose simple_switch_13.py ofctl_rest.py
+```
+
+2. Arranque la topologia:
+
+```bash
+sudo mn --topo=single,3 --mac --switch=ovsk,protocols=OpenFlow13 --controller=remote,ip=127.0.0.1:6653  --link=tc,bw=100 
+```
+
+3. Mire la cantidad de CPU consumida por los procesos:
+
+```bash
+sudo python test3.py
+```
+
+## Referencias ##
+
+1. https://recursospython.com/guias-y-manuales/subprocess-creacion-y-comunicacion-con-procesos/
+2. https://kite.com/python/examples/5681/signal-kill-a-process
+3. https://gist.github.com/marcoagner/9926309
+4. http://devopstechie.com/how-to-get-cpu-utilization-and-memory-usage-in-python-psutil/
+5. http://www.marinamele.com/7-tips-to-time-python-scripts-and-control-memory-and-cpu-usage
+6. https://thispointer.com/python-get-list-of-all-running-processes-and-sort-by-highest-memory-usage/
+7. https://psutil.readthedocs.io/en/latest/
+8. https://www.blog.pythonlibrary.org/2016/06/16/python-101-redirecting-stdout/
+9. https://eli.thegreenplace.net/2015/redirecting-all-kinds-of-stdout-in-python/
 
 
 
