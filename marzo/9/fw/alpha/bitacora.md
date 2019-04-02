@@ -6,9 +6,13 @@
 
 #### ToDo ####
 * Empezar la adaptacion del codigo.
+* Agregar y probar las otras mediciones en el codigo.
+* Hacer el main del experimento. Buscar la version antigua de disenoExperimental.py en el github. Aqui se hizo antes esto.
+* 
 #### Doing ####
 
-* Verificar el codigo que ya se encuentra listo o practicamente listo y anotarlo.
+* Verificar el codigo que ya se encuentra listo o practicamente listo y anotarlo:
+  * experimento.py
 
 #### Done ####
 * Acabar de implentar la parte del trafico para el caso del ping.
@@ -24,7 +28,7 @@ A continuacion se lista el codigo que se encuentra en etapa casi de culminacion:
    * Se modifico el tiempo de lanzamiento del ataque en lo que respecta al iperf.
    * Se modifico el tiempo de lanzamiento en lo que respecta al ping. 
 4. unidadExperimental.py (Codificado, probado).
-5. disenoExperimental.py (Codificado, probado). Se modifico solo para la generacion de los experimentos. Nada de test.
+5. disenoExperimental.py (Codificado, probado). 
 
 ## Enlaces de interes ##
 1. https://www.python-course.eu/forking.php

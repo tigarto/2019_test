@@ -44,15 +44,17 @@ def codificarTratamientos(niveles):
     i = 0
     index_fac = 0
     index_row = 0
-    for e in np.nditer(tr, order='F'):        
-        if i < num_rows:
-            i += 1  
-        else:
-            index_row = 0
-            i = 0
-            index_fac += 1
+    k = 0
+    for e in np.nditer(tr, order='F'): 
+        i += 1      
         tr_cod[index_row][index_fac] = niveles[factores[index_fac]][e]
         index_row += 1
+        if i%num_rows == 0:
+            index_row = 0
+            index_fac += 1
+
+        
+        
     return tr_cod
 
 def obtenerNumeroTratamientos(tratamientos):
@@ -82,12 +84,37 @@ if __name__ == "__main__":
     niveles = { 'controlador': ['ryu','pox'],
             'trafico': ['normal','ataque1','ataque2']
     }
-    tratamientos = obtenerTratamientos(niveles)
+    
+    tr = obtenerTratamientos(niveles)
+    print(tr)
     tr_cod = codificarTratamientos(niveles)
+    print(tr_cod)
     n_tr = obtenerNumeroTratamientos(tr_cod)
-    m = crearMatrixReplicas(n_tr,20)
+    print(n_tr)
+    m = crearMatrixReplicas(n_tr,3)
+    print(m)
     ot = definirOrdenTratamientos(m,tr_cod)
     print(ot)
+    
+    print("*********************************************")
+
+    niveles2 = { 'controlador': ['ryu','pox'],
+                 'trafico': ['normal','ataque1','ataque2'],
+                 'topologia':['topo1','topo2']
+               }
+    tr2 = obtenerTratamientos(niveles2)
+    print(tr2)
+    tr2_cod = codificarTratamientos(niveles2)
+    print(tr2_cod)
+    n_tr2 = obtenerNumeroTratamientos(tr2_cod)
+    print(n_tr2)
+    m2 = crearMatrixReplicas(n_tr,2)
+    print(m2)
+    ot2 = definirOrdenTratamientos(m2,tr2_cod)
+    print(ot2)
+
+
+
 
 
 
