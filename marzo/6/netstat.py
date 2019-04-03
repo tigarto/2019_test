@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+"""
+Codigo tomado de: https://gist.github.com/abhi-bit/cafd0edcf107ac2f66b9
+"""
+
 import pwd
 import os
 import re
