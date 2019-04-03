@@ -7,15 +7,41 @@ import subprocess
 from time import time, sleep
 import psutil
 from mininet.cli import CLI
+from mininet.topo import Topo
 
 
 from trafico import TraficoAtaque, TraficoNormal
 from unidadExperimental import UnidadExperimental
-from topologia import TopologiaPOX, TopologiaRyu
 from controlador import RYU, POX
 import subprocess
 
+
 class Experimento:
+
+    """
+    Clase usada para representar un experimento
+
+    ...
+
+    Attributes
+    ----------
+    net
+    inputs
+    trafico
+
+    Methods
+    -------
+    configureParams
+    getUnidadExperimental
+    configurarTrafico
+    killTest
+    killController
+    startTest
+    endTest
+    startCLI
+    pingAllTest        
+    """
+
     def __init__(self):
         self.net = None
         self.inputs = None
@@ -29,6 +55,7 @@ class Experimento:
                             link=TCLink,
                             topo = ue.getTopo()
                           )
+        sleep(5) # Dando un tiempo de espera para que el controlador arranque
         self.net.build()
 
     # Metodo para configurar la unidad experimental
@@ -69,194 +96,105 @@ class Experimento:
 
 ## Funciones de test ##
 
-def test1():
-    setLogLevel("debug")
-    print ("Configuracion Unidad experimental")
-    t1 = TopologiaRyu()
-    ue1 = UnidadExperimental()
-    ue1.setTopo(t1)
-    ue1.setController('ryu', 'simple_switch_13.py,ofctl_rest.py')
+
+class TopologiaTest(Topo):
+    def __init__(self, bw = 100):
+        # Initialize topology
+        Topo.__init__(self)
+        self.bw = bw
+        h1 = self.addHost('h1', ip='10.0.0.1')  # Cliente
+        h2 = self.addHost('h2', ip='10.0.0.2')  # Atacante
+        h3 = self.addHost('h3', ip='10.0.0.3')  # Victima
+
+        # Add switches
+        info('*** Adding switches\n')
+        s1 = self.addSwitch('s1', protocols='OpenFlow13')
+
+        # Add links
+        info('*** Creating links\n')
+        self.addLink(h1, s1, bw = self.bw)
+        self.addLink(h2, s1, bw = self.bw)
+        self.addLink(h3, s1, bw = self.bw)
+
+ue_ryu = UnidadExperimental(topo=TopologiaTest(100),controller=RYU('c0'))
+ue_ryu.definirNodosClaves('h1','h2','h3')
+
+ue_pox = UnidadExperimental(topo=TopologiaTest(100),controller=POX('c0'))
+ue_pox.definirNodosClaves('h1','h2','h3')
+
+def test_cli(ue,nombreArchivo = None):
+    # Parametros de la unidad experimental
+    setLogLevel("info")
+    info("Configurando unidad experimental\n")
+    info("Configurando trafico normal\n")
+    info("Configurando la red\n")
+    net = Mininet(topo = ue.getTopo(),controller=ue.getController(),build=False)
     print ("Configuracion del experimento")
-    exp1 = Experimento()
-    exp1.configureParams(ue1)
-    exp1.configurarTrafico()  # Se deduce de la unidad experimental
-    exp1.startTest()
-    exp1.startCLI()
-    exp1.endTest()
+    experimento = Experimento()
+    experimento.configureParams(ue)
+    experimento.configurarTrafico()  # Se deduce de la unidad experimental
+    print ("Realizacion de las pruebas")
+    experimento.startTest()
+    experimento.startCLI()
+    experimento.endTest()
     print ("Removiendo la topologia")
-    exp1.killTest()
+    experimento.killTest()
     print ("Removiendo el controlador")
-    exp1.killController()   # Si no se pone no se finaliza el controlador
+    experimento.killController()   # Si no se pone no se finaliza el controlador
 
-def test2():
+
+def test_ping_normal(ue,nombreArchivo = None):
+    # Parametros de la unidad experimental
     setLogLevel("info")
-    info("Configuracion Unidad experimental")
-    """ 1 -> Definicion de la topologia """
-    t1 = TopologiaRyu()
-    ue1 = UnidadExperimental()
-    ue1.setTopo(t1)
-    ue1.definirNodosClaves('h1','h2','h3') # Caso solo para trafico normal
-    ue1.setController('ryu', 'simple_switch_13.py,ofctl_rest.py')
-    """ 3. Confiracion del experimento """
-    exp1 = Experimento()
-    exp1.configureParams(ue1)
+    info("Configurando unidad experimental\n")
+    info("Configurando trafico normal\n")
+    info("Configurando la red\n")
+    print ("Configuracion del experimento")
+    experimento = Experimento()
+    experimento.configureParams(ue)
+    experimento.configurarTrafico(tipo='normal')  # Se deduce de la unidad experimental
+    # Arrancando la red para dar inicio a las pruebas
+    experimento.startTest()
+    # Llevando a cabo las pruebas
+    experimento.net.pingAll() # Se lleva a cabo esto para que el controlador aprenda la red
+    sleep(5) # Dando un tiempo prudencial antes de la siguiente prueba
+    experimento.trafico.pingMeasure(filename=nombreArchivo)    # Finalizando las pruebas
+    experimento.endTest()
+    experimento.killTest()
+    experimento.killController()
 
-    """ 4. Inicio del experimento """
-    exp1.startTest()
-    """ 5. Aplicacion de pruebas """
-    exp1.pingAllTest()
-    """ 6. Fin del experimento """
-    exp1.endTest()
-    info("Removiendo la topologia\n")
-    exp1.killTest()
-    info("Removiendo el controlador\n")
-    exp1.killController()  # Si no se pone no se finaliza el controlador
-
-def test3():
-    """ Prueba con ping normal """
+def test_iperf_normal(ue,nombreArchivo = None):
+    # Parametros de la unidad experimental
     setLogLevel("info")
-    info("Configuracion Unidad experimental")
-    """ 1 -> Definicion de la topologia """
-    t1 = TopologiaRyu()
-    ue1 = UnidadExperimental()
-    ue1.setTopo(t1)
-    ue1.definirNodosClaves(C='h2', V='h3')  # Caso solo para trafico normal
-    ue1.setController('ryu', 'simple_switch_13.py,ofctl_rest.py')
-    info("Configuracion del experimento")
-    """ 3. Confiracion del experimento """
-    exp1 = Experimento()
-    exp1.configureParams(ue1)
-    exp1.configurarTrafico('normal')
-    """ 4. Inicio del experimento """
-    exp1.startTest()
-    """ 5. Aplicacion de pruebas """
-    exp1.trafico.pingMeasure()
-    exp1.trafico.pingMeasure(filename='ensayo_ping.log')
-    """ 6. Fin del experimento """
-    exp1.endTest()
-    info("Removiendo la topologia\n")
-    exp1.killTest()
-    info("Removiendo el controlador\n")
-    exp1.killController()  # Si no se pone no se finaliza el controlador
+    info("Configurando unidad experimental\n")
+    info("Configurando trafico normal\n")
+    info("Configurando la red\n")
+    print ("Configuracion del experimento")
+    experimento = Experimento()
+    experimento.configureParams(ue)
+    experimento.configurarTrafico(tipo='normal')  # Se deduce de la unidad experimental
+    # Arrancando la red para dar inicio a las pruebas
+    experimento.startTest()
+    # Llevando a cabo las pruebas
+    experimento.net.pingAll() # Se lleva a cabo esto para que el controlador aprenda la red
+    sleep(5) # Dando un tiempo prudencial antes de la siguiente prueba
+    experimento.trafico.iperfMeasure(filename=nombreArchivo)    # Finalizando las pruebas
+    experimento.endTest()
+    experimento.killTest()
+    experimento.killController()
 
-
-def test4():
-    """ Prueba con ping normal """
-    setLogLevel("info")
-    info("Configuracion Unidad experimental")
-    """ 1 -> Definicion de la topologia """
-    t1 = TopologiaRyu()
-    ue1 = UnidadExperimental()
-    ue1.setTopo(t1)
-    ue1.definirNodosClaves(C='h2', V='h3')  # Caso solo para trafico normal
-    ue1.setController('ryu', 'simple_switch_13.py,ofctl_rest.py')
-    info("Configuracion del experimento")
-    """ 3. Confiracion del experimento """
-    exp1 = Experimento()
-    exp1.configureParams(ue1)
-    exp1.configurarTrafico('normal')
-    """ 4. Inicio del experimento """
-    exp1.startTest()
-    """ 5. Aplicacion de pruebas """
-    exp1.trafico.iperfMeasure()
-    exp1.trafico.iperfMeasure(filename='iperf_normal_test.log')
-    """ 6. Fin del experimento """
-    exp1.endTest()
-    info("Removiendo la topologia\n")
-    exp1.killTest()
-    info("Removiendo el controlador\n")
-    exp1.killController()  # Si no se pone no se finaliza el controlador
-
-def test5():
-    """ Prueba con ping normal """
-    setLogLevel("info")
-    info("Configuracion Unidad experimental")
-    """ 1 -> Definicion de la topologia """
-    t1 = TopologiaRyu()
-    ue1 = UnidadExperimental()
-    ue1.setTopo(t1)
-    ue1.definirNodosClaves(A = 'h1', C='h2', V='h3')  # Caso solo para trafico normal
-    ue1.setController('ryu', 'simple_switch_13.py,ofctl_rest.py')
-    info("Configuracion del experimento")
-    """ 3. Confiracion del experimento """
-    exp1 = Experimento()
-    exp1.configureParams(ue1)
-    exp1.configurarTrafico('ataque')
-    """ 4. Inicio del experimento """
-    exp1.startTest()
-    exp1.pingAllTest()  # **************** Parece que es necesario que se de un arranque al controlador
-                        # **************** para que aprenda las reglas antes del ataque.
-
-    """ 5. Aplicacion de pruebas """
-    exp1.trafico.pingMeasure()
-    exp1.trafico.pingMeasure(filename='ping_ataque_test.log')
-    """ 6. Fin del experimento """
-    exp1.endTest()
-    info("Removiendo la topologia\n")
-    exp1.killTest()
-    info("Removiendo el controlador\n")
-    exp1.killController()  # Si no se pone no se finaliza el controlador
-
-def test6():
-    """ Prueba con ping normal """
-    setLogLevel("info")
-    info("Configuracion Unidad experimental")
-    """ 1 -> Definicion de la topologia """
-    t1 = TopologiaRyu()
-    ue1 = UnidadExperimental()
-    ue1.setTopo(t1)
-    ue1.definirNodosClaves(A = 'h1', C='h2', V='h3')  # Caso solo para trafico normal
-    ue1.setController('ryu', 'simple_switch_13.py,ofctl_rest.py')
-    info("Configuracion del experimento")
-    """ 3. Confiracion del experimento """
-    exp1 = Experimento()
-    exp1.configureParams(ue1)
-    exp1.configurarTrafico('ataque')
-    """ 4. Inicio del experimento """
-    exp1.startTest()
-    """ 5. Aplicacion de pruebas """
-    # exp1.trafico.iperfMeasure()  # Si se lanza afecta la proxima medida.
-    exp1.trafico.iperfMeasure(filename='iperf_ataque_test.log')
-    """ 6. Fin del experimento """
-    exp1.endTest()
-    info("Removiendo la topologia\n")
-    exp1.killTest()
-    info("Removiendo el controlador\n")
-    exp1.killController()  # Si no se pone no se finaliza el controlador
-
-
-def test7():
-    """ Prueba con ping normal """
-    setLogLevel("info")
-    info("Configuracion Unidad experimental")
-    """ 1 -> Definicion de la topologia """
-    t1 = TopologiaPOX()
-    ue1 = UnidadExperimental()
-    ue1.setTopo(t1)
-    ue1.definirNodosClaves(A = 'h1', C='h2', V='h3')  # Caso solo para trafico normal
-    ue1.setController('pox')
-    info("Configuracion del experimento")
-    """ 3. Confiracion del experimento """
-    exp1 = Experimento()
-    exp1.configureParams(ue1)
-    exp1.configurarTrafico('ataque')
-    """ 4. Inicio del experimento """
-    exp1.startTest()
-    """ 5. Aplicacion de pruebas """
-    # exp1.trafico.iperfMeasure()  # Si se lanza afecta la proxima medida.
-    exp1.trafico.iperfMeasure(filename='iperf_ataque_pox_test.log')
-    """ 6. Fin del experimento """
-    exp1.endTest()
-    info("Removiendo la topologia\n")
-    exp1.killTest()
-    info("Removiendo el controlador\n")
-    exp1.killController()  # Si no se pone no se finaliza el controlador
 
 if __name__ == "__main__":
+    ## Testing CLI ##
+    # test_cli(ue_ryu) # CLI usando ryu -> OK
+    # test_cli(ue_pox) # CLI usando pox -> 
+    # test_ping_normal(ue_ryu,'ping_normal_ryu.log') # Medicion del ping para trafico normal en ryu-> OK
+    # test_ping_normal(ue_pox,'ping_normal_pox.log') # Medicion del ping para trafico normal en pox -> OK
+    test_iperf_normal(ue_ryu,'iperf_normal_ryu.log') # Medicion del iperf para trafico normal en ryu -> OK
     # test1()    # OK
     # test2()    # OK
     # test3()    # Prueba con ping normal (consola y archivo) - OK
-    test4()    # Prueba con iperf normal (consola y archivo) - OK ** No se ve la cosa en pantalla
+    #test4()    # Prueba con iperf normal (consola y archivo) - OK ** No se ve la cosa en pantalla
     # test5()    # Prueba con ping bajo ataque - Parece que OK
     # test6()      # Prueba con iperf bajo ataque (consola y archivo parece que OK) - Nota: Solo hacer un caso pues el
                  # resultado se afecta.
