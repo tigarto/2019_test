@@ -6,16 +6,25 @@
 
 #### ToDo ####
 * Empezar la adaptacion del codigo.
-* Agregar y probar las otras mediciones en el codigo.
 * Hacer el main del experimento. Buscar la version antigua de disenoExperimental.py en el github. Aqui se hizo antes esto.
-* 
+  
 #### Doing ####
 
 * Verificar el codigo que ya se encuentra listo o practicamente listo y anotarlo:
-  * experimento.py
+  
 
+  
 #### Done ####
 * Acabar de implentar la parte del trafico para el caso del ping.
+* Agregar codigo que hagan lo siguiente:
+  * **Obtenga los pid de los elementos de la red**: 
+    * netstat.py: script que obtiene los puertos empleados por aplicaciones.
+    * test3.py: script que obtiene los pids de los elementos de la red que se esta probando.
+    * test_get_controller_pid.py: script que contiene el pid del controlador empleando la funcion netstat.
+* **Realice un sniffing de la interfaz openFlow**: 
+    * test_tshark.py: Sniffing de la interfaz OF.
+* **Realizar un sniffing**:
+    * test_bwm-ng.py: Sniffing de los puertos del switch.
 
 ### Informe de actividades ###
 
@@ -29,6 +38,7 @@ A continuacion se lista el codigo que se encuentra en etapa casi de culminacion:
    * Se modifico el tiempo de lanzamiento en lo que respecta al ping. 
 4. unidadExperimental.py (Codificado, probado).
 5. disenoExperimental.py (Codificado, probado). 
+6. experimento.py (Codificado pero hay problemas en la prueba, esto pues se no se lanzan metricas con trafico normal y de ataque).
 
 ## Enlaces de interes ##
 1. https://www.python-course.eu/forking.php
