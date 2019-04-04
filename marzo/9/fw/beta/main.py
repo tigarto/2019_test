@@ -27,7 +27,7 @@ def getPIDElements(port = 6653):
     for l in lines:
         if "mininet" in l:
             mininet_lines.append(l)
-    print mininet_lines
+    # print mininet_lines
     dicProcesos = {}
     for p in mininet_lines:
         l = p.split()
@@ -75,6 +75,7 @@ def monitoring_ping_normal(ue,nombreArchivo = None):
     info("Configurando trafico normal\n")
     info("Configurando la red\n")
     net = Mininet(topo = ue.getTopo(), controller=ue.getController(), link=TCLink, build=False)
+    info("wait 5s ...\n")
     sleep(5) # Dando un tiempo de espera para que el controlador arranque
     net.build()
     # Configurando clase asociada al trafico
@@ -85,18 +86,21 @@ def monitoring_ping_normal(ue,nombreArchivo = None):
     V = net.get(V)
     t_normal = TraficoNormal(C,V)    
     net.start()
+    info("wait 5s ...\n")
+    sleep(5)
+    dicProcesos = getPIDElements()
+    # Si da lo siguiente ira luego a un timer
+    for k in dicProcesos:
+        p = psutil.Process(dicProcesos[k])
+        dic_attr = p.as_dict(attrs=['pid', 'name', 'cpu_percent'])
+        print(k,dic_attr['pid'],dic_attr['cpu_percent'])
     # Arrancando la red
     net.getNodeByName('c0').cmd("tcpdump -i any -nn port 6653 -U -w mylog &")
     net.pingAll()
-    t_normal.pingMeasure() # Mostrando salida en pantalla
     t_normal.pingMeasure(filename = nombreArchivo) # Llevando salida a un archivo
     CLI(net)
     net.stop()
     net.getNodeByName('c0').cmd("pkill tcpdump")
-
-
-
-
 
 if __name__ == "__main__":
     monitoring_ping_normal(ue_ryu,'ping_normal_ryu.log')
