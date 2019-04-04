@@ -5,13 +5,13 @@
 ### Actividades ###
 
 #### ToDo ####
-* Empezar la adaptacion del codigo.
-* Hacer el main del experimento. Buscar la version antigua de disenoExperimental.py en el github. Aqui se hizo antes esto.
   
 #### Doing ####
 
-* Verificar el codigo que ya se encuentra listo o practicamente listo y anotarlo:
-  
+* Hacer el main del experimento. Buscar la version antigua de disenoExperimental.py en el github. Aqui se hizo antes esto.
+* Empezar la adaptacion del codigo.
+* Empezar a adaptar la funcion que mide la CPU gastada por los componenetes de la red en una funcion handler dentro de un timer.
+* Implementar la parte que mide la CPU de los elementos de red como una funcion
 
   
 #### Done ####
