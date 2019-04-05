@@ -89,18 +89,36 @@ def monitoring_ping_normal(ue,nombreArchivo = None):
     info("wait 5s ...\n")
     sleep(5)
     dicProcesos = getPIDElements()
-    # Si da lo siguiente ira luego a un timer
-    for k in dicProcesos:
-        p = psutil.Process(dicProcesos[k])
-        dic_attr = p.as_dict(attrs=['pid', 'name', 'cpu_percent'])
-        print(k,dic_attr['pid'],dic_attr['cpu_percent'])
-    # Arrancando la red
+    name_procesos = dicProcesos.keys()
+    pids_procesos = dicProcesos.values()
+    f = open("cpu_measure.log","w+")
+    title_procesos = str(name_procesos).strip("[]")
+    title_procesos = title_procesos.replace(', ',';')
+    f.write(title_procesos + "\n")
+    args_timer = dicProcesos.items() + [f]
+    TIEMPO = 1
+    timer = threading.Timer(TIEMPO, getCPUMeasure, args = args_timer)
+    timer.start()
     net.getNodeByName('c0').cmd("tcpdump -i any -nn port 6653 -U -w mylog &")
     net.pingAll()
     t_normal.pingMeasure(filename = nombreArchivo) # Llevando salida a un archivo
     CLI(net)
     net.stop()
+    timer.cancel()
+    f.close()    
     net.getNodeByName('c0').cmd("pkill tcpdump")
+
+# Problema - Solo es llamado una sola vez
+def getCPUMeasure(*args):
+    print('*')
+    measure_cpu = ''
+    for arg in args[:-1]:
+        p = psutil.Process(arg[1])
+        cpu_p = p.cpu_percent()
+        measure_cpu = measure_cpu + str(cpu_p) + ";"
+    measure_cpu = measure_cpu.rstrip(';')
+    args[-1].write(measure_cpu + "\n")  
+
 
 if __name__ == "__main__":
     monitoring_ping_normal(ue_ryu,'ping_normal_ryu.log')
