@@ -5,13 +5,17 @@
 ### Actividades ###
 
 #### ToDo ####
-  
+* Ver los siguientes enlaces:
+  * https://pythonspot.com/threading/comment-page-1/
+  * https://nitratine.net/blog/post/python-threading-basics/
+  * https://www.python-course.eu/threads.php
+  * 
 #### Doing ####
 
 * Hacer el main del experimento. Buscar la version antigua de disenoExperimental.py en el github. Aqui se hizo antes esto.
 * Empezar la adaptacion del codigo.
 * Empezar a adaptar la funcion que mide la CPU gastada por los componenetes de la red en una funcion handler dentro de un timer.
-* Implementar la parte que mide la CPU de los elementos de red como una funcion
+* Implementar la parte que mide la CPU de los elementos de red como una funcion.
 
   
 #### Done ####
