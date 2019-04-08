@@ -103,31 +103,38 @@ def monitoring_ping_normal(ue,nombreArchivo = None):
     net.getNodeByName('c0').cmd("tcpdump -i any -nn port 6653 -U -w mylog &")
     net.pingAll()
     t_normal.pingMeasure(filename = nombreArchivo) # Llevando salida a un archivo
-    CLI(net)
-    net.stop()
     BAN_CPU_MEASURE = False
+    #CLI(net)
+    
     info("wait 2s ...\n")
     sleep(2)
-    timer.join()
+    
+    #timer.join()
+    net.stop() 
     f.close()    
     net.getNodeByName('c0').cmd("pkill tcpdump")
 
 # Problema - Solo es llamado una sola vez  ---- https://www.geeksforgeeks.org/python-different-ways-to-kill-a-thread/
 def getCPUMeasure(*args):
-    while BAN_CPU_MEASURE == True:
-        #print('*')
-        sleep(1)  # Lleva a cabo una medida cada segundo
-        measure_cpu = ''
-        for arg in args[:-1]:
-            p = psutil.Process(arg[1])
-            cpu_p = p.cpu_percent()
-            measure_cpu = measure_cpu + str(cpu_p) + ";"
-        measure_cpu = measure_cpu.rstrip(';')
-        args[-1].write(measure_cpu + "\n") 
-        if BAN_CPU_MEASURE == False:
-            break
-
-   
+    setLogLevel("info")
+    try:
+        global BAN_CPU_MEASURE
+        while BAN_CPU_MEASURE == True:    
+            if BAN_CPU_MEASURE == False:
+                info("Termiando medicion de la CPU...")  
+                break    
+            #print('*')
+            sleep(1)  # Lleva a cabo una medida cada segundo
+            measure_cpu = ''
+            for arg in args[:-1]:
+                p = psutil.Process(arg[1])
+                cpu_p = p.cpu_percent()
+                measure_cpu = measure_cpu + str(cpu_p) + ";"
+            measure_cpu = measure_cpu.rstrip(';')
+            args[-1].write(measure_cpu + "\n") 
+    except psutil.NoSuchProcess:
+        info("Termiando medicion de la CPU...")        
+        
 
 
 if __name__ == "__main__":
