@@ -19,6 +19,7 @@ from mininet.link import TCLink
 from trafico import Trafico, TraficoNormal, TraficoAtaque
 from netstat import netstat
 
+BAN_CPU_MEASURE = True   # Bandera que indica que se esta llevando a cabo una medicion de CPU
 
 def getPIDElements(port = 6653):
     pl = subprocess.Popen(['ps', '-ax','-o','pid,cmd'], stdout=subprocess.PIPE).communicate()[0]
@@ -91,33 +92,55 @@ def monitoring_ping_normal(ue,nombreArchivo = None):
     dicProcesos = getPIDElements()
     name_procesos = dicProcesos.keys()
     pids_procesos = dicProcesos.values()
-    f = open("cpu_measure.log","w+")
-    title_procesos = str(name_procesos).strip("[]")
-    title_procesos = title_procesos.replace(', ',';')
-    f.write(title_procesos + "\n")
-    args_timer = dicProcesos.items() + [f]
-    TIEMPO = 1
-    timer = threading.Timer(TIEMPO, getCPUMeasure, args = args_timer)
-    timer.start()
-    net.getNodeByName('c0').cmd("tcpdump -i any -nn port 6653 -U -w mylog &")
-    net.pingAll()
-    t_normal.pingMeasure(filename = nombreArchivo) # Llevando salida a un archivo
-    CLI(net)
-    net.stop()
-    timer.cancel()
-    f.close()    
-    net.getNodeByName('c0').cmd("pkill tcpdump")
+    pid_cpu = os.fork()
+    
+    if pid_cpu == 0:
+        # Hijo --> Se encargara de la medicion de la CPU  
+        f = open("cpu_measure.log","w+")      
+        title_procesos = str(name_procesos).strip("[]")
+        title_procesos = title_procesos.replace(', ',';')
+        f.write(title_procesos + "\n")
+        args = dicProcesos.items() + [f]
+        TIEMPO = 1
+        sleep(TIEMPO)  # Lleva a cabo una medida cada segundo
+        measure_cpu = ''
+        while BAN_CPU_MEASURE:
+            sleep(1) # Medicion cada un segundo
+            for arg in args[:-1]:
+                p = psutil.Process(arg[1])
+                cpu_p = p.cpu_percent()
+                measure_cpu = measure_cpu + str(cpu_p) + ";"
+            measure_cpu = measure_cpu.rstrip(';')
+            args[-1].write(measure_cpu + "\n") 
+    else:
+        # padre
+        net.getNodeByName('c0').cmd("tcpdump -i any -nn port 6653 -U -w mylog &")
+        net.pingAll()
+        t_normal.pingMeasure(filename = nombreArchivo) # Llevando salida a un archivo
+        CLI(net)
+        net.stop()
+        os.kill(pid_cpu,signal.SIGKILL)
+        info("wait 2s ...\n")
+        sleep(2)
+        # f.close() -- Se comento, por lo menos espero que se vaya con el proceso    
+        net.getNodeByName('c0').cmd("pkill tcpdump")
 
 # Problema - Solo es llamado una sola vez
 def getCPUMeasure(*args):
-    print('*')
-    measure_cpu = ''
-    for arg in args[:-1]:
-        p = psutil.Process(arg[1])
-        cpu_p = p.cpu_percent()
-        measure_cpu = measure_cpu + str(cpu_p) + ";"
-    measure_cpu = measure_cpu.rstrip(';')
-    args[-1].write(measure_cpu + "\n")  
+    while BAN_CPU_MEASURE:
+        print('*')
+        sleep(1)  # Lleva a cabo una medida cada segundo
+        measure_cpu = ''
+        for arg in args[:-1]:
+            p = psutil.Process(arg[1])
+            cpu_p = p.cpu_percent()
+            measure_cpu = measure_cpu + str(cpu_p) + ";"
+        measure_cpu = measure_cpu.rstrip(';')
+        args[-1].write(measure_cpu + "\n") 
+        if BAN_CPU_MEASURE == 0:
+            break
+
+   
 
 
 if __name__ == "__main__":
