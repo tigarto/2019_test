@@ -66,6 +66,8 @@ class TopologiaTest(Topo):
 ue_ryu = UnidadExperimental(topo=TopologiaTest(bw = 100),controller=RYU('c0'))
 ue_ryu.definirNodosClaves('h1','h2','h3')
 
+ue_pox = UnidadExperimental(topo=TopologiaTest(bw = 100),controller=POX('c0'))
+ue_pox.definirNodosClaves('h1','h2','h3')
 
 
 
@@ -114,6 +116,55 @@ def monitoring_ping_normal(ue,nombreArchivo = None):
     f.close()    
     net.getNodeByName('c0').cmd("pkill tcpdump")
 
+
+def monitoring_ping_ataque(ue,nombreArchivo = None):
+    # Parametros de la unidad experimental
+    setLogLevel("info")
+    info("Configurando unidad experimental\n")
+    info("Configurando trafico normal\n")
+    info("Configurando la red\n")
+    net = Mininet(topo = ue.getTopo(), controller=ue.getController(), link=TCLink, build=False)
+    info("wait 5s ...\n")
+    sleep(5) # Dando un tiempo de espera para que el controlador arranque
+    net.build()
+    # Configurando clase asociada al trafico
+    info("Configurando clase asociada al trafico\n")    
+    [A,C,V] = ue.obtenerNodosClaves()
+    # ---- info("%s %s %s\n"%(A,C,V))
+    A = net.get(A)
+    C = net.get(C)
+    V = net.get(V)
+    t_ataque = TraficoAtaque(A,C,V)   
+    net.start()
+    info("wait 5s ...\n")
+    sleep(5)
+    dicProcesos = getPIDElements()
+    name_procesos = dicProcesos.keys()
+    pids_procesos = dicProcesos.values()
+    f = open("cpu_measure.log","w+")
+    title_procesos = str(name_procesos).strip("[]")
+    title_procesos = title_procesos.replace(', ',';')
+    f.write(title_procesos + "\n")
+    args_timer = dicProcesos.items() + [f]
+    TIEMPO = 1
+    timer = threading.Timer(TIEMPO, getCPUMeasure, args = args_timer)
+    timer.start()
+    net.getNodeByName('c0').cmd("tcpdump -i any -nn port 6653 -U -w mylog &")
+    net.pingAll()
+    t_ataque.pingMeasure(filename = nombreArchivo) # Llevando salida a un archivo
+    BAN_CPU_MEASURE = False
+    #CLI(net)
+    
+    info("wait 2s ...\n")
+    sleep(2)
+    
+    #timer.join()
+    net.stop() 
+    f.close()    
+    net.getNodeByName('c0').cmd("pkill tcpdump")
+
+
+
 # Problema - Solo es llamado una sola vez  ---- https://www.geeksforgeeks.org/python-different-ways-to-kill-a-thread/
 def getCPUMeasure(*args):
     setLogLevel("info")
@@ -138,6 +189,8 @@ def getCPUMeasure(*args):
 
 
 if __name__ == "__main__":
-    monitoring_ping_normal(ue_ryu,'ping_normal_ryu.log')
-    
+    # monitoring_ping_normal(ue_ryu,'ping_normal_ryu.log')
+    # monitoring_ping_ataque(ue_ryu,'ping_ataque_ryu.log')
+    # monitoring_ping_normal(ue_pox,'ping_normal_pox.log')
+    monitoring_ping_ataque(ue_pox,'ping_ataque_pox.log')
     
